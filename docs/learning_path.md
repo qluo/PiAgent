@@ -6,7 +6,7 @@ Students run `demo.py` and see the full assistant loop working with fake tools.
 
 ## Lesson 2: Build The Face State And Face Controller
 
-Students learn how the agent updates `FaceState`, how the face controller reads it, and how each state maps to PNG pictures in the `faces/` folders copied from the original be-more-agent repo.
+Students learn how the agent updates `FaceState`, how the face controller reads it, and how each state maps to simple Mini panda bot PNG pictures in the `faces/` folders.
 
 ## Lesson 3: Add Wake Word Detection
 
