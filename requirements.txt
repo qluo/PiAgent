@@ -13,3 +13,6 @@ requests
 
 # Web search tool
 duckduckgo-search
+
+# Tests
+pytest

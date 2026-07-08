@@ -313,6 +313,29 @@ python3 demo.py</code></pre>
 # - what the function should return</code></pre>
     </section>
 
+    <section>
+      <h2>How To Run Lesson Tests</h2>
+      <p>Each lesson has a matching test folder. Run one small test file at a time while you build. Later lesson tests may fail until you build those parts.</p>
+      <div class="two">
+        <div class="card blue">
+          <h3>Command Pattern</h3>
+          <p>Use <code>uv run pytest</code> followed by one test file or one lesson folder.</p>
+        </div>
+        <div class="card green">
+          <h3>Good Sign</h3>
+          <p>When the test passes, your function matches the behavior needed for that lesson.</p>
+        </div>
+      </div>
+      <pre><code># Run one small test while building a function.
+uv run pytest tests/lesson_2/test_03_renderer_load.py
+
+# Run a whole lesson when you think it is complete.
+uv run pytest tests/lesson_2
+
+# Run everything after Lesson 9.
+uv run pytest tests</code></pre>
+    </section>
+
     <section id="lesson-1" class="lesson">
       <span class="tag">Lesson 1</span>
       <h2>Demo The Fake Agent</h2>
@@ -356,6 +379,12 @@ python3 demo.py</code></pre>
         <li>You can explain why Lesson 1 is fake on purpose.</li>
         <li>You added one custom response to <code>FakeLlmTool.answer()</code>.</li>
       </ul>
+      <h3>Test</h3>
+      <pre><code>uv run pytest tests/lesson_1/test_01_fake_llm.py
+uv run pytest tests/lesson_1/test_02_demo_agent_quit.py
+
+# Or run the whole lesson:
+uv run pytest tests/lesson_1</code></pre>
     </section>
 
     <section id="lesson-2" class="lesson">
@@ -393,10 +422,17 @@ python3 demo.py</code></pre>
         <li>In <code>demo.py</code>, find every line that calls <code>face_state.set(...)</code>.</li>
         <li>Run the demo and watch the face state change from idle to listening, thinking, speaking, and back to idle.</li>
         <li>Open the local <code>faces/</code> folder and look at the picture folders: <code>idle</code>, <code>listening</code>, <code>thinking</code>, <code>speaking</code>, <code>error</code>, <code>capturing</code>, and <code>warmup</code>.</li>
+        <li>Run the state test first: <code>uv run pytest tests/lesson_2/test_01_face_state.py</code>.</li>
+        <li>Run the picture folder test: <code>uv run pytest tests/lesson_2/test_02_face_assets.py</code>.</li>
         <li>Open <code>face/renderer.py</code>. Implement <code>load()</code> so it reads PNG files from each folder.</li>
         <li>Store the loaded pictures in a dictionary where the key is the state name, such as <code>"thinking"</code>.</li>
+        <li>Run the load test before drawing anything: <code>uv run pytest tests/lesson_2/test_03_renderer_load.py</code>.</li>
         <li>Implement <code>draw(state)</code> so it draws the next picture for the current state.</li>
-        <li>Open <code>face/controller.py</code>. Implement <code>run()</code> so it repeatedly reads <code>face_state.get()</code> and asks the renderer to draw that state.</li>
+        <li>Store <code>self.last_drawn_state = state</code> inside <code>draw()</code> so the test can check which state was drawn.</li>
+        <li>Run the draw test: <code>uv run pytest tests/lesson_2/test_04_renderer_draw.py</code>.</li>
+        <li>Open <code>face/controller.py</code>. Implement <code>run_once()</code> so it reads <code>face_state.get()</code> and asks the renderer to draw that state one time.</li>
+        <li>Run the controller step test: <code>uv run pytest tests/lesson_2/test_05_controller_run_once.py</code>.</li>
+        <li>Implement <code>run()</code> so it loads the renderer once, then repeatedly calls <code>run_once()</code> and sleeps briefly.</li>
         <li>Find <code>Thread(target=face_controller.run, daemon=True).start()</code> in <code>main.py</code>.</li>
         <li>Discuss why the face controller needs a background thread: the picture face should not freeze while the agent waits for input.</li>
       </ol>
@@ -423,6 +459,15 @@ python3 demo.py</code></pre>
         <li>You can explain how one face state maps to one picture folder.</li>
         <li>The renderer can show at least one PNG picture from the <code>faces/</code> folder.</li>
       </ul>
+      <h3>Test</h3>
+      <pre><code>uv run pytest tests/lesson_2/test_01_face_state.py
+uv run pytest tests/lesson_2/test_02_face_assets.py
+uv run pytest tests/lesson_2/test_03_renderer_load.py
+uv run pytest tests/lesson_2/test_04_renderer_draw.py
+uv run pytest tests/lesson_2/test_05_controller_run_once.py
+
+# Or run the whole lesson:
+uv run pytest tests/lesson_2</code></pre>
     </section>
 
     <section id="lesson-3" class="lesson">
@@ -472,6 +517,12 @@ python3 demo.py</code></pre>
         <li>The wake word code stays inside <code>WakeWordTool</code>.</li>
         <li>The rest of the agent does not know whether wake word detection is fake, keyboard-based, or microphone-based.</li>
       </ul>
+      <h3>Test</h3>
+      <pre><code>uv run pytest tests/lesson_3/test_01_wake_word_api.py
+uv run pytest tests/lesson_3/test_02_keyboard_wake_word.py
+
+# Or run the whole lesson:
+uv run pytest tests/lesson_3</code></pre>
     </section>
 
     <section id="lesson-4" class="lesson">
@@ -522,6 +573,12 @@ self.tts.speak(response)</code></pre>
         <li>The agent calls tools instead of doing tool work directly.</li>
         <li>Face states match the part of the loop currently running.</li>
       </ul>
+      <h3>Test</h3>
+      <pre><code>uv run pytest tests/lesson_4/test_01_agent_respond.py
+uv run pytest tests/lesson_4/test_02_agent_dependencies.py
+
+# Or run the whole lesson:
+uv run pytest tests/lesson_4</code></pre>
     </section>
 
     <section id="lesson-5" class="lesson">
@@ -574,6 +631,12 @@ self.tts.speak(response)</code></pre>
         <li>The STT tool returns text.</li>
         <li>The agent can answer a spoken question.</li>
       </ul>
+      <h3>Test</h3>
+      <pre><code>uv run pytest tests/lesson_5/test_01_stt_api.py
+uv run pytest tests/lesson_5/test_02_keyboard_stt.py
+
+# Or run the whole lesson:
+uv run pytest tests/lesson_5</code></pre>
     </section>
 
     <section id="lesson-6" class="lesson">
@@ -623,6 +686,12 @@ self.tts.speak(response)</code></pre>
         <li>The agent can speak one sentence out loud.</li>
         <li>The face shows <code>speaking</code> while the answer is playing.</li>
       </ul>
+      <h3>Test</h3>
+      <pre><code>uv run pytest tests/lesson_6/test_01_tts_api.py
+uv run pytest tests/lesson_6/test_02_tts_speak.py
+
+# Or run the whole lesson:
+uv run pytest tests/lesson_6</code></pre>
     </section>
 
     <section id="lesson-7" class="lesson">
@@ -675,6 +744,12 @@ self.tts.speak(response)</code></pre>
         <li>The LLM tool can answer a simple question.</li>
         <li>The agent uses <code>LlmTool</code> through <code>Agent.respond()</code>.</li>
       </ul>
+      <h3>Test</h3>
+      <pre><code>uv run pytest tests/lesson_7/test_01_llm_settings.py
+uv run pytest tests/lesson_7/test_02_llm_answer.py
+
+# Or run the whole lesson:
+uv run pytest tests/lesson_7</code></pre>
     </section>
 
     <section id="lesson-8" class="lesson">
@@ -727,6 +802,12 @@ with DDGS() as ddgs:
         <li>The agent can decide when to use search.</li>
         <li>The LLM can answer using search context.</li>
       </ul>
+      <h3>Test</h3>
+      <pre><code>uv run pytest tests/lesson_8/test_01_search_api.py
+uv run pytest tests/lesson_8/test_02_search_returns_text.py
+
+# Or run the whole lesson:
+uv run pytest tests/lesson_8</code></pre>
     </section>
 
     <section id="lesson-9" class="lesson">
@@ -779,6 +860,11 @@ with DDGS() as ddgs:
         <li>The search tool works when the user asks for search.</li>
         <li>You can explain what each folder does.</li>
       </ul>
+      <h3>Test</h3>
+      <pre><code>uv run pytest tests/lesson_9/test_01_project_wiring.py
+
+# Run all tests when everything is complete:
+uv run pytest tests</code></pre>
     </section>
 
     <section>

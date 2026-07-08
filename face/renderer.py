@@ -45,6 +45,7 @@ class FaceRenderer:
         # 2. Keep a frame index for each state.
         # 3. Draw the current frame.
         # 4. Move the frame index forward.
+        # 5. Store self.last_drawn_state = state so your test can check it.
         #
         # Expected return value:
         # Nothing. The result appears on the display.
