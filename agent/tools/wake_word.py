@@ -1,6 +1,13 @@
 class WakeWordTool:
-    def wait(self):
-        """Block until the wake word is detected."""
+    def wait(self) -> None:
+        """Block until the wake word is detected.
+
+        Inputs:
+        - None. A real version listens to the microphone.
+
+        Output:
+        - None. Returns only after the wake word is detected.
+        """
         # Lesson 3: Wake Word Detection
         #
         # Goal:

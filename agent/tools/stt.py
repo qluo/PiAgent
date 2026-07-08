@@ -1,6 +1,13 @@
 class SpeechToTextTool:
     def listen_and_transcribe(self) -> str:
-        """Capture user speech and return transcribed text."""
+        """Capture user speech and return transcribed text.
+
+        Inputs:
+        - None. A real version records audio from the microphone.
+
+        Output:
+        - The user's words as a string.
+        """
         # Lesson 5: Speech-To-Text
         #
         # Goal:

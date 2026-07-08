@@ -1,5 +1,30 @@
+from face.state import FaceState
+
+
 class Agent:
-    def __init__(self, face_state, wake_word, stt, tts, llm, tools):
+    def __init__(
+        self,
+        face_state: FaceState,
+        wake_word: object,
+        stt: object,
+        tts: object,
+        llm: object,
+        tools: dict[str, object],
+    ) -> None:
+        """Create the agent.
+
+        Inputs:
+        - face_state: shared FaceState used to tell the face controller what
+          the agent is doing.
+        - wake_word: tool object with wait() -> None.
+        - stt: tool object with listen_and_transcribe() -> str.
+        - tts: tool object with speak(text: str) -> None.
+        - llm: tool object with answer(user_text: str) -> str.
+        - tools: optional extra tools, such as {"search": SearchTool()}.
+
+        Output:
+        - None. The new Agent stores these objects for later use.
+        """
         self.face_state = face_state
         self.wake_word = wake_word
         self.stt = stt
@@ -7,8 +32,21 @@ class Agent:
         self.llm = llm
         self.tools = tools
 
-    def run(self):
-        """Main agentic loop."""
+    def run(self) -> None:
+        """Run the main agentic loop.
+
+        Inputs:
+        - None directly. This method uses the tools passed into __init__().
+
+        Output:
+        - None. This method keeps running until the program is stopped.
+
+        Side effects:
+        - Changes face_state.
+        - Waits for wake word.
+        - Records/transcribes speech.
+        - Speaks the answer.
+        """
         # Lesson 4: Implement The Main Agent Loop
         #
         # Goal:
@@ -35,7 +73,14 @@ class Agent:
         pass
 
     def respond(self, user_text: str) -> str:
-        """Produce a response, optionally using tools."""
+        """Produce a response, optionally using tools.
+
+        Inputs:
+        - user_text: the user's question or command as text.
+
+        Output:
+        - A response string that can be sent to self.tts.speak(...).
+        """
         # Lesson 4, then Lessons 7 and 8:
         #
         # Goal:

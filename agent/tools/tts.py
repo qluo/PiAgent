@@ -1,6 +1,13 @@
 class TextToSpeechTool:
-    def speak(self, text: str):
-        """Speak text aloud."""
+    def speak(self, text: str) -> None:
+        """Speak text aloud.
+
+        Inputs:
+        - text: the sentence the agent should say.
+
+        Output:
+        - None. Returns after speaking or printing is finished.
+        """
         # Lesson 6: Text-To-Speech
         #
         # Goal:

@@ -10,7 +10,14 @@ class SearchTool:
     """
 
     def search(self, query: str) -> str:
-        """Search for information and return text context."""
+        """Search for information and return text context.
+
+        Inputs:
+        - query: the words to search for.
+
+        Output:
+        - A short text summary that can be passed into the LLM as context.
+        """
         # Lesson 8: Tools - Web Search
         #
         # Goal:

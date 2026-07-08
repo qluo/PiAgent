@@ -1,6 +1,17 @@
 class FaceRenderer:
-    def load(self):
-        """Load face assets from disk."""
+    def load(self) -> dict[str, list[object]]:
+        """Load face assets from disk.
+
+        Inputs:
+        - None. Reads image files from the local faces/ folder.
+
+        Output:
+        - A dictionary mapping each face state to a list of loaded frames.
+          Example: {"idle": [frame1, frame2]}.
+
+        Side effects:
+        - Usually stores the same dictionary on self.frames.
+        """
         # Lesson 2: Face Renderer
         #
         # Goal:
@@ -21,10 +32,21 @@ class FaceRenderer:
         #
         # Expected result:
         # After load() runs, draw("thinking") can find thinking frames.
-        pass
+        return {}
 
-    def draw(self, state: str):
-        """Draw the next frame for a face state."""
+    def draw(self, state: str) -> None:
+        """Draw the next frame for a face state.
+
+        Inputs:
+        - state: face state name, such as "idle", "thinking", or "speaking".
+
+        Output:
+        - None. The result appears on the display.
+
+        Side effects:
+        - Draws one frame.
+        - Usually updates self.last_drawn_state and a frame index.
+        """
         # Lesson 2: Face Renderer
         #
         # Goal:

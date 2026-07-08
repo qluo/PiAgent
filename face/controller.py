@@ -1,10 +1,31 @@
+from face.renderer import FaceRenderer
+from face.state import FaceState
+
+
 class FaceController:
-    def __init__(self, face_state, renderer=None):
+    def __init__(self, face_state: FaceState, renderer: FaceRenderer | None = None) -> None:
+        """Create the face controller.
+
+        Inputs:
+        - face_state: shared FaceState object to read the current face state.
+        - renderer: optional FaceRenderer. If None, students can create one
+          inside their implementation.
+
+        Output:
+        - None. The controller stores the inputs for later use.
+        """
         self.face_state = face_state
         self.renderer = renderer
 
-    def run_once(self):
-        """Render one face frame."""
+    def run_once(self) -> None:
+        """Render one face frame.
+
+        Inputs:
+        - None directly. Reads self.face_state and uses self.renderer.
+
+        Output:
+        - None. Draws exactly one frame as a side effect.
+        """
         # Lesson 2: Testable Face Controller Step
         #
         # Goal:
@@ -19,8 +40,15 @@ class FaceController:
         # Nothing. This method draws exactly one frame.
         pass
 
-    def run(self):
-        """Continuously render the face matching the latest FaceState."""
+    def run(self) -> None:
+        """Continuously render the face matching the latest FaceState.
+
+        Inputs:
+        - None directly. Reads self.face_state and uses self.renderer.
+
+        Output:
+        - None. This method keeps running until the program is stopped.
+        """
         # Lesson 2: Face Controller
         #
         # Goal:
