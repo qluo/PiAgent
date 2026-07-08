@@ -11,14 +11,31 @@ class SearchTool:
 
     def search(self, query: str) -> str:
         """Search for information and return text context."""
-        # TODO: Import DDGS after installing duckduckgo-search:
-        # from duckduckgo_search import DDGS
+        # Lesson 8: Tools - Web Search
         #
-        # TODO: Use DDGS to search for information related to the query.
-        # TODO: Return a short text summary that the LLM can use.
+        # Goal:
+        # Search the web and return a short piece of text that the LLM can use.
         #
-        # Example shape for later:
-        # with DDGS() as ddgs:
-        #     results = list(ddgs.text(query, region="us-en", max_results=1))
-        #     ...
+        # Suggested package:
+        # - duckduckgo-search: provides the DDGS helper.
+        #
+        # Import after installing requirements:
+        #   from duckduckgo_search import DDGS
+        #
+        # Concept to learn:
+        # Search tools usually return lots of data. Your job is to shape that
+        # data into a small, useful context string.
+        #
+        # Small first step:
+        # Ask for one result with max_results=1.
+        #
+        # Real version idea:
+        # 1. Open DDGS with: with DDGS() as ddgs:
+        # 2. Call ddgs.text(query, region="us-en", max_results=1).
+        # 3. Pull out the title, href, and body/snippet.
+        # 4. Return a short string for the LLM.
+        #
+        # Expected return value:
+        # A short string like:
+        #   "Title: ...\nSummary: ...\nURL: ..."
         return ""
