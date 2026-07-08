@@ -29,6 +29,9 @@ python3 demo.py
 
 ## Run Lesson Tests
 
+Run tests from the project folder, the folder that contains `demo.py`, `face/`,
+`agent/`, and `pytest.ini`.
+
 Each lesson has its own test folder. Run one small test at a time while you build.
 For example, in Lesson 2 you can test `FaceState`, then `FaceRenderer.load()`, then
 `FaceRenderer.draw()`:
