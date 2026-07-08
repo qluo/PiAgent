@@ -150,8 +150,10 @@
     }
 
     pre {
+      position: relative;
       margin: 12px 0 0;
       padding: 16px;
+      padding-right: 86px;
       overflow-x: auto;
       border-radius: 8px;
       background: var(--code);
@@ -162,6 +164,24 @@
 
     code {
       font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    .copy-button {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      padding: 6px 10px;
+      border: 1px solid #7d8ca3;
+      border-radius: 6px;
+      background: #ffffff;
+      color: #16202a;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .copy-button:hover {
+      background: var(--blue);
     }
 
     .checklist li {
@@ -461,16 +481,16 @@ uv run pytest tests/lesson_1</code></pre>
         <li>In <code>demo.py</code>, find every line that calls <code>face_state.set(...)</code>.</li>
         <li>Run the demo and watch the face state change from idle to listening, thinking, speaking, and back to idle.</li>
         <li>Open the local <code>faces/</code> folder and look at the picture folders: <code>idle</code>, <code>listening</code>, <code>thinking</code>, <code>speaking</code>, <code>error</code>, <code>capturing</code>, and <code>warmup</code>.</li>
-        <li>Run the state test first: <code>uv run pytest tests/lesson_2/test_01_face_state.py</code>.</li>
-        <li>Run the picture folder test: <code>uv run pytest tests/lesson_2/test_02_face_assets.py</code>.</li>
+        <li>Run the state test first:<pre><code>uv run pytest tests/lesson_2/test_01_face_state.py</code></pre></li>
+        <li>Run the picture folder test:<pre><code>uv run pytest tests/lesson_2/test_02_face_assets.py</code></pre></li>
         <li>Open <code>face/renderer.py</code>. Implement <code>load()</code> so it reads PNG files from each folder.</li>
         <li>Store the loaded pictures in a dictionary where the key is the state name, such as <code>"thinking"</code>.</li>
-        <li>Run the load test before drawing anything: <code>uv run pytest tests/lesson_2/test_03_renderer_load.py</code>.</li>
+        <li>Run the load test before drawing anything:<pre><code>uv run pytest tests/lesson_2/test_03_renderer_load.py</code></pre></li>
         <li>Implement <code>draw(state)</code> so it draws the next picture for the current state.</li>
         <li>Store <code>self.last_drawn_state = state</code> inside <code>draw()</code> so the test can check which state was drawn.</li>
-        <li>Run the draw test: <code>uv run pytest tests/lesson_2/test_04_renderer_draw.py</code>.</li>
+        <li>Run the draw test:<pre><code>uv run pytest tests/lesson_2/test_04_renderer_draw.py</code></pre></li>
         <li>Open <code>face/controller.py</code>. Implement <code>run_once()</code> so it reads <code>face_state.get()</code> and asks the renderer to draw that state one time.</li>
-        <li>Run the controller step test: <code>uv run pytest tests/lesson_2/test_05_controller_run_once.py</code>.</li>
+        <li>Run the controller step test:<pre><code>uv run pytest tests/lesson_2/test_05_controller_run_once.py</code></pre></li>
         <li>Implement <code>run()</code> so it loads the renderer once, then repeatedly calls <code>run_once()</code> and sleeps briefly.</li>
         <li>Find <code>Thread(target=face_controller.run, daemon=True).start()</code> in <code>main.py</code>.</li>
         <li>Discuss why the face controller needs a background thread: the picture face should not freeze while the agent waits for input.</li>
@@ -930,6 +950,45 @@ uv run pytest tests</code></pre>
   </main>
   <script>
     const storageKeyPrefix = "pi-agent-lesson-step";
+
+    document.querySelectorAll("pre").forEach((block, index) => {
+      const code = block.querySelector("code");
+      if (!code) {
+        return;
+      }
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "copy-button";
+      button.textContent = "Copy";
+      button.setAttribute("aria-label", `Copy code block ${index + 1}`);
+
+      button.addEventListener("click", async () => {
+        const text = code.textContent;
+
+        try {
+          await navigator.clipboard.writeText(text);
+          button.textContent = "Copied";
+        } catch (_error) {
+          const textArea = document.createElement("textarea");
+          textArea.value = text;
+          textArea.style.position = "fixed";
+          textArea.style.left = "-9999px";
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          document.execCommand("copy");
+          textArea.remove();
+          button.textContent = "Copied";
+        }
+
+        window.setTimeout(() => {
+          button.textContent = "Copy";
+        }, 1400);
+      });
+
+      block.appendChild(button);
+    });
 
     document.querySelectorAll(".lesson").forEach((lesson) => {
       const lessonId = lesson.id || "lesson";
