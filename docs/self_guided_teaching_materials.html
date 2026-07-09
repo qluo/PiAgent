@@ -458,6 +458,7 @@ uv run pytest tests/lesson_1</code></pre>
             <li>Background thread: the face controller keeps running while the agent waits.</li>
             <li>Picture frames: each state loads PNG files from its matching folder.</li>
             <li>Animation frames: one state can have more than one picture.</li>
+            <li>Renderer memory: <code>__init__()</code> stores loaded frames and frame indexes.</li>
           </ul>
         </div>
         <div class="card green">
@@ -484,6 +485,7 @@ uv run pytest tests/lesson_1</code></pre>
         <li>Run the state test first:<pre><code>uv run pytest tests/lesson_2/test_01_face_state.py</code></pre></li>
         <li>Run the picture folder test:<pre><code>uv run pytest tests/lesson_2/test_02_face_assets.py</code></pre></li>
         <li>Open <code>face/renderer.py</code>. Implement <code>load()</code> so it reads PNG files from each folder.</li>
+        <li>Read <code>FaceRenderer.__init__()</code>. Notice that <code>faces_dir</code>, <code>frames</code>, <code>frame_indexes</code>, and <code>last_drawn_state</code> are stored on <code>self</code>.</li>
         <li>Store the loaded pictures in a dictionary where the key is the state name, such as <code>"thinking"</code>.</li>
         <li>Run the load test before drawing anything:<pre><code>uv run pytest tests/lesson_2/test_03_renderer_load.py</code></pre></li>
         <li>Implement <code>draw(state)</code> so it draws the next picture for the current state.</li>
@@ -511,6 +513,9 @@ uv run pytest tests/lesson_1</code></pre>
     thinking_02.png
     thinking_03.png
     thinking_04.png</code></pre>
+      <pre><code>renderer = FaceRenderer(faces_dir="faces")
+renderer.load()
+renderer.draw("thinking")</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
         <li>You can explain what <code>FaceState.set()</code> does.</li>
@@ -540,6 +545,7 @@ uv run pytest tests/lesson_2</code></pre>
             <li>Blocking functions: <code>wait()</code> pauses until the wake word is heard.</li>
             <li>Audio sample rate: wake word tools often expect 16 kHz audio.</li>
             <li>Tool swapping: the agent still calls <code>wake_word.wait()</code> no matter how the tool works inside.</li>
+            <li>Configuration: <code>__init__()</code> stores settings such as threshold and sample rate.</li>
           </ul>
         </div>
         <div class="card green">
@@ -561,6 +567,7 @@ uv run pytest tests/lesson_2</code></pre>
       <ol>
         <li>Read <code>FakeWakeWordTool.wait()</code> in <code>demos/lesson1_demo.py</code>.</li>
         <li>Open <code>agent/tools/wake_word.py</code>.</li>
+        <li>Read <code>WakeWordTool.__init__()</code>. Notice <code>model_path</code>, <code>threshold</code>, and <code>sample_rate</code>.</li>
         <li>Keep the same method name: <code>wait()</code>.</li>
         <li>First implement a keyboard wake word: loop until the user types <code>wake</code>.</li>
         <li>Then explore <code>openwakeword</code>: load a wake word model, read microphone audio, and check the prediction score.</li>
@@ -568,6 +575,11 @@ uv run pytest tests/lesson_2</code></pre>
         <li>Return from <code>wait()</code> only when the wake word is detected.</li>
       </ol>
       <pre><code>class WakeWordTool:
+    def __init__(self, model_path=None, threshold=0.5, sample_rate=16000):
+        self.model_path = model_path
+        self.threshold = threshold
+        self.sample_rate = sample_rate
+
     def wait(self):
         # TODO: listen until the wake word is detected
         pass</code></pre>
@@ -655,6 +667,7 @@ uv run pytest tests/lesson_4</code></pre>
             <li>Recording audio from a microphone.</li>
             <li>Saving audio as a short WAV file.</li>
             <li>Transcribing audio into text.</li>
+            <li>Recording settings: <code>__init__()</code> stores sample rate, duration, and output file path.</li>
           </ul>
         </div>
         <div class="card green">
@@ -675,6 +688,7 @@ uv run pytest tests/lesson_4</code></pre>
       <h3>Steps</h3>
       <ol>
         <li>Open <code>agent/tools/stt.py</code>.</li>
+        <li>Read <code>SpeechToTextTool.__init__()</code>. Notice <code>sample_rate</code>, <code>seconds</code>, and <code>output_wav</code>.</li>
         <li>Keep the method name <code>listen_and_transcribe()</code>.</li>
         <li>Use <code>sounddevice</code> to record a short microphone clip.</li>
         <li>Save the clip as <code>input.wav</code>.</li>
@@ -682,7 +696,12 @@ uv run pytest tests/lesson_4</code></pre>
         <li>Read the transcription result and return it as a string.</li>
         <li>Print the transcription while debugging so you can see what the agent heard.</li>
       </ol>
-      <pre><code>def listen_and_transcribe(self) -> str:
+      <pre><code>def __init__(self, sample_rate=16000, seconds=3.0, output_wav="input.wav"):
+    self.sample_rate = sample_rate
+    self.seconds = seconds
+    self.output_wav = output_wav
+
+def listen_and_transcribe(self) -> str:
     # TODO: record microphone audio
     # TODO: save input.wav
     # TODO: run local speech-to-text
@@ -713,6 +732,7 @@ uv run pytest tests/lesson_5</code></pre>
             <li>Turning text into an audio file.</li>
             <li>Playing audio through the Raspberry Pi speaker.</li>
             <li>Keeping speech code inside a tool.</li>
+            <li>Speech settings: <code>__init__()</code> stores the voice model path and output WAV path.</li>
           </ul>
         </div>
         <div class="card green">
@@ -733,13 +753,18 @@ uv run pytest tests/lesson_5</code></pre>
       <h3>Steps</h3>
       <ol>
         <li>Open <code>agent/tools/tts.py</code>.</li>
+        <li>Read <code>TextToSpeechTool.__init__()</code>. Notice <code>voice_model_path</code> and <code>output_wav</code>.</li>
         <li>Keep the method name <code>speak(text)</code>.</li>
         <li>Install or prepare a local TTS engine such as Piper.</li>
         <li>Generate a WAV file from a short sentence.</li>
         <li>Play the WAV file through the speaker.</li>
         <li>Call <code>tts.speak(response)</code> from the agent only after the face switches to <code>speaking</code>.</li>
       </ol>
-      <pre><code>def speak(self, text: str):
+      <pre><code>def __init__(self, voice_model_path=None, output_wav="output.wav"):
+    self.voice_model_path = voice_model_path
+    self.output_wav = output_wav
+
+def speak(self, text: str):
     # TODO: turn text into audio
     # TODO: play the audio
     pass</code></pre>
@@ -826,6 +851,7 @@ uv run pytest tests/lesson_7</code></pre>
             <li>Tool routing: the agent decides when to call search.</li>
             <li>Search result shaping: return a short title and snippet, not a giant page.</li>
             <li>Context: search results become extra information for the LLM.</li>
+            <li>Search settings: <code>__init__()</code> stores result count and region.</li>
           </ul>
         </div>
         <div class="card green">
@@ -847,6 +873,7 @@ uv run pytest tests/lesson_7</code></pre>
       <h3>Steps</h3>
       <ol>
         <li>Open <code>agent/tools/search.py</code>.</li>
+        <li>Read <code>SearchTool.__init__()</code>. Notice <code>max_results</code> and <code>region</code>.</li>
         <li>Install <code>duckduckgo-search</code> when you are ready.</li>
         <li>Import <code>DDGS</code>.</li>
         <li>Use <code>ddgs.text(...)</code> to fetch one or two results.</li>
@@ -858,7 +885,9 @@ uv run pytest tests/lesson_7</code></pre>
       <pre><code>from duckduckgo_search import DDGS
 
 with DDGS() as ddgs:
-    results = list(ddgs.text(query, region="us-en", max_results=1))</code></pre>
+    results = list(
+        ddgs.text(query, region=self.region, max_results=self.max_results)
+    )</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
         <li>The search tool returns a short useful result.</li>

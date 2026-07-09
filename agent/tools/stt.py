@@ -1,9 +1,29 @@
 class SpeechToTextTool:
+    def __init__(
+        self,
+        sample_rate: int = 16000,
+        seconds: float = 3.0,
+        output_wav: str = "input.wav",
+    ) -> None:
+        """Create the speech-to-text tool.
+
+        Inputs:
+        - sample_rate: microphone sample rate for recording.
+        - seconds: starting recording length for the first version.
+        - output_wav: path where recorded audio can be saved.
+
+        Output:
+        - None. Stores settings for listen_and_transcribe().
+        """
+        self.sample_rate = sample_rate
+        self.seconds = seconds
+        self.output_wav = output_wav
+
     def listen_and_transcribe(self) -> str:
         """Capture user speech and return transcribed text.
 
         Inputs:
-        - None. A real version records audio from the microphone.
+        - None. A real version records audio using settings from __init__().
 
         Output:
         - The user's words as a string.

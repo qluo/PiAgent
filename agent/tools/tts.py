@@ -1,4 +1,21 @@
 class TextToSpeechTool:
+    def __init__(
+        self,
+        voice_model_path: str | None = None,
+        output_wav: str = "output.wav",
+    ) -> None:
+        """Create the text-to-speech tool.
+
+        Inputs:
+        - voice_model_path: optional path to a local TTS voice model.
+        - output_wav: path where generated speech audio can be saved.
+
+        Output:
+        - None. Stores settings for speak().
+        """
+        self.voice_model_path = voice_model_path
+        self.output_wav = output_wav
+
     def speak(self, text: str) -> None:
         """Speak text aloud.
 

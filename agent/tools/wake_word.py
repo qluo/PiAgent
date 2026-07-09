@@ -1,9 +1,30 @@
 class WakeWordTool:
+    def __init__(
+        self,
+        model_path: str | None = None,
+        threshold: float = 0.5,
+        sample_rate: int = 16000,
+    ) -> None:
+        """Create the wake word tool.
+
+        Inputs:
+        - model_path: optional path to an openWakeWord model file.
+        - threshold: score needed before the wake word counts as detected.
+        - sample_rate: microphone sample rate expected by the wake model.
+
+        Output:
+        - None. Stores settings for wait().
+        """
+        self.model_path = model_path
+        self.threshold = threshold
+        self.sample_rate = sample_rate
+
     def wait(self) -> None:
         """Block until the wake word is detected.
 
         Inputs:
-        - None. A real version listens to the microphone.
+        - None. A real version listens to the microphone using settings from
+          __init__().
 
         Output:
         - None. Returns only after the wake word is detected.

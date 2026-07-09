@@ -58,6 +58,22 @@ uv run pytest tests/lesson_9
 
 It is normal for later lesson tests to fail before you implement those lessons.
 
+## Tool Settings
+
+Some skeleton classes have an `__init__()` method that stores settings before
+the real implementation is written. For example:
+
+```python
+WakeWordTool(threshold=0.5, sample_rate=16000)
+SpeechToTextTool(seconds=3.0, output_wav="input.wav")
+TextToSpeechTool(output_wav="output.wav")
+SearchTool(max_results=1, region="us-en")
+FaceRenderer(faces_dir="faces")
+```
+
+Students can keep the defaults at first, then change one setting at a time
+when testing real hardware.
+
 ## Run The Wake Word Audio Demo
 
 Lesson 3 also has a manual microphone demo. This is not a unit test because it

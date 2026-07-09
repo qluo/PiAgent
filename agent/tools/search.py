@@ -9,6 +9,19 @@ class SearchTool:
     - Import DDGS: from duckduckgo_search import DDGS
     """
 
+    def __init__(self, max_results: int = 1, region: str = "us-en") -> None:
+        """Create the search tool.
+
+        Inputs:
+        - max_results: number of search results to ask for.
+        - region: DuckDuckGo search region, such as "us-en".
+
+        Output:
+        - None. Stores settings for search().
+        """
+        self.max_results = max_results
+        self.region = region
+
     def search(self, query: str) -> str:
         """Search for information and return text context.
 
