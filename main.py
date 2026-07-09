@@ -30,8 +30,9 @@ def main() -> None:
         stt=SpeechToTextTool(),
         tts=TextToSpeechTool(
             voice_model_path="models/piper/en_US-lessac-low.onnx",
+            piper_binary="tools/piper/piper"
         ),
-        llm=LlmTool(),
+        llm=LlmTool(model_name="gemma3:1b"),
         tools={
             "search": SearchTool(),
         },
