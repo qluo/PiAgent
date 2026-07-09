@@ -12,7 +12,7 @@ openwakeword
 requests
 
 # Web search tool
-duckduckgo-search
+ddgs
 
 # Tests
 pytest

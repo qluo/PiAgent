@@ -12,6 +12,8 @@ class FaceRenderer:
         self.frames: dict[str, list[object]] = {}
         self.frame_indexes: dict[str, int] = {}
         self.last_drawn_state: str | None = None
+        self._pygame: object | None = None
+        self._screen: object | None = None
 
     def load(self) -> dict[str, list[object]]:
         """Load face assets from disk.
@@ -48,6 +50,25 @@ class FaceRenderer:
         # After load() runs, draw("thinking") can find thinking frames.
         return self.frames
 
+    def _setup_display(self) -> None:
+        """Prepare pygame for drawing face images.
+
+        This helper is separated for students: Lesson 2 can first load images,
+        then fill in the display setup, then fill in drawing.
+        """
+        try:
+            import pygame
+
+            pygame.init()
+            self._pygame = pygame
+            if self._screen is None:
+                self._screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        except Exception:
+            # Tests and laptops may not have a real display. Keep loaded frames
+            # usable so students can still test the code before moving to the Pi.
+            self._pygame = None
+            self._screen = None
+
     def draw(self, state: str) -> None:
         """Draw the next frame for a face state.
 
@@ -77,12 +98,30 @@ class FaceRenderer:
         # Draw the first image for the state without animation.
         #
         # Real version idea:
-        # 1. Look up the frame list for state.
-        # 2. Keep a frame index for each state.
-        # 3. Draw the current frame.
-        # 4. Move the frame index forward.
-        # 5. Store self.last_drawn_state = state so your test can check it.
+        # 1. If the display is not ready yet, call self._setup_display().
+        # 2. Look up the frame list for state.
+        # 3. Keep a frame index for each state.
+        # 4. Get the current frame.
+        # 5. Call self._draw_with_pygame(frame).
+        # 6. Move the frame index forward.
+        # 7. Store self.last_drawn_state = state so your test can check it.
         #
         # Expected return value:
         # Nothing. The result appears on the display.
+        pass
+
+    def _draw_with_pygame(self, frame: object) -> None:
+        """Draw one frame with pygame when a display is available."""
+        # Lesson 2 helper: draw one already-loaded frame with pygame.
+        #
+        # Goal:
+        # Take one image frame and show it on the pygame screen.
+        #
+        # Suggested steps:
+        # 1. If self._pygame or self._screen is missing, return early.
+        # 2. Read pygame events so the display stays responsive.
+        # 3. Convert the frame into a pygame surface.
+        # 4. Scale the surface to fit the screen.
+        # 5. Blit the surface onto the screen.
+        # 6. Call pygame.display.flip() to show the new frame.
         pass

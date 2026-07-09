@@ -73,6 +73,7 @@ SpeechToTextTool(
 )
 TextToSpeechTool(
     voice_model_path="models/piper/en_US-lessac-low.onnx",
+    piper_binary="tools/piper/piper",
 )
 SearchTool(max_results=1, region="us-en")
 FaceRenderer(faces_dir="faces")
@@ -110,7 +111,8 @@ arecord -l
 aplay -l
 ```
 
-If your speaker does not play, test it directly:
+If your speaker does not play, test it directly. This command keeps running
+until you press Ctrl+C:
 
 ```bash
 speaker-test -t wav -c 2

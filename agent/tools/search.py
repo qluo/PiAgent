@@ -2,11 +2,11 @@ class SearchTool:
     """Web search tool using DuckDuckGo search.
 
     This follows the original Raspberry Pi agent repo's simple approach:
-    use the `duckduckgo_search` package and its `DDGS` helper.
+    use the `ddgs` package and its `DDGS` helper.
 
     Setup idea:
     - Install project packages: uv pip install -r requirements.txt
-    - Import DDGS: from duckduckgo_search import DDGS
+    - Import DDGS: from ddgs import DDGS
     """
 
     def __init__(self, max_results: int = 1, region: str = "us-en") -> None:
@@ -37,10 +37,10 @@ class SearchTool:
         # Search the web and return a short piece of text that the LLM can use.
         #
         # Suggested package:
-        # - duckduckgo-search: provides the DDGS helper.
+        # - ddgs: provides the DDGS helper.
         #
         # Import after installing requirements:
-        #   from duckduckgo_search import DDGS
+        #   from ddgs import DDGS
         #
         # Concept to learn:
         # Search tools usually return lots of data. Your job is to shape that

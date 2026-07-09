@@ -40,7 +40,7 @@ class FaceController:
         # Nothing. This method draws exactly one frame.
         pass
 
-    def run(self) -> None:
+    def run(self, sleep_seconds: float = 0.1) -> None:
         """Continuously render the face matching the latest FaceState.
 
         Inputs:

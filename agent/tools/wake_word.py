@@ -1,9 +1,14 @@
+DEFAULT_WAKE_WORD_MODEL = "hey_jarvis"
+CHUNK_SIZE = 1280
+
+
 class WakeWordTool:
     def __init__(
         self,
-        model_path: str | None = None,
+        model_path: str | None = DEFAULT_WAKE_WORD_MODEL,
         threshold: float = 0.5,
         sample_rate: int = 16000,
+        mode: str = "microphone",
     ) -> None:
         """Create the wake word tool.
 
@@ -18,6 +23,7 @@ class WakeWordTool:
         self.model_path = model_path
         self.threshold = threshold
         self.sample_rate = sample_rate
+        self.mode = mode
 
     def wait(self) -> None:
         """Block until the wake word is detected.
@@ -50,4 +56,25 @@ class WakeWordTool:
         #
         # Expected return value:
         # Nothing. This method returns only when the wake word is detected.
+        # Lesson 3 helper functions:
+        # - For keyboard practice, call self._wait_for_keyboard_wake().
+        # - For the Raspberry Pi version, call self._wait_for_microphone_wake().
+        # - Use self.mode to choose between "keyboard" and "microphone".
+        pass
+
+    def _wait_for_keyboard_wake(self) -> None:
+        """Teaching helper: wait until someone types wake."""
+        # TODO for students:
+        # 1. Keep asking for input().
+        # 2. Return when the typed word is "wake".
+        pass
+
+    def _wait_for_microphone_wake(self) -> None:
+        """Listen to microphone audio and check openWakeWord scores."""
+        # TODO for students:
+        # 1. Load an openWakeWord model.
+        # 2. Open the microphone with sounddevice.
+        # 3. Read short audio chunks.
+        # 4. Ask the wake word model for prediction scores.
+        # 5. Return when a score is above self.threshold.
         pass

@@ -91,10 +91,14 @@ class Agent:
         # Return self.llm.answer(user_text).
         #
         # Later:
-        # If the user says "search" or "look up", call:
-        #   self.tools["search"].search(user_text)
-        # Then pass the search result into:
-        #   self.llm.answer_with_context(user_text, context)
+        # 1. Ask the LLM if search is needed:
+        #      self.llm.needs_search(user_text)
+        # 2. If the LLM says search is needed, call:
+        #      self.tools["search"].search(user_text)
+        # 3. Pass the search result into:
+        #      self.llm.answer_with_context(user_text, context)
+        # 4. If search is not needed, call:
+        #      self.llm.answer(user_text)
         #
         # Expected return value:
         # A string that can be sent to self.tts.speak(...).

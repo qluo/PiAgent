@@ -1,20 +1,26 @@
 class TextToSpeechTool:
     def __init__(
         self,
-        voice_model_path: str | None = None,
-        output_wav: str = "output.wav",
+        voice_model_path: str = "models/piper/en_US-lessac-low.onnx",
+        piper_binary: str = "piper",
+        player_binary: str = "aplay",
+        sample_rate: int = 22050,
     ) -> None:
         """Create the text-to-speech tool.
 
         Inputs:
-        - voice_model_path: optional path to a local TTS voice model.
-        - output_wav: path where generated speech audio can be saved.
+        - voice_model_path: path to a local Piper voice model.
+        - piper_binary: path or command name for the Piper program.
+        - player_binary: path or command name for the audio player.
+        - sample_rate: audio sample rate expected by the Piper voice.
 
         Output:
         - None. Stores settings for speak().
         """
         self.voice_model_path = voice_model_path
-        self.output_wav = output_wav
+        self.piper_binary = piper_binary
+        self.player_binary = player_binary
+        self.sample_rate = sample_rate
 
     def speak(self, text: str) -> None:
         """Speak text aloud.
@@ -41,9 +47,17 @@ class TextToSpeechTool:
         #
         # Real version idea:
         # 1. Send text into Piper.
-        # 2. Save speech as output.wav.
-        # 3. Play output.wav with aplay.
+        # 2. Ask Piper for raw audio with --output-raw.
+        # 3. Pipe Piper's raw audio directly into aplay.
         #
         # Expected return value:
         # Nothing. This method finishes after speaking is done.
+        # Piper reads text from stdin and writes raw speech audio to stdout.
+        # aplay reads that raw audio from stdin and sends it to the speaker.
+        #
+        # TODO for students:
+        # 1. Start piper with subprocess.Popen(...).
+        # 2. Send text into piper stdin.
+        # 3. Pipe piper stdout into aplay stdin, without saving a WAV file.
+        # 4. Wait for both programs to finish.
         pass

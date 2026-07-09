@@ -7,11 +7,11 @@ class LlmTool:
 
     Setup idea:
     - Install Ollama on the Raspberry Pi.
-    - Pull a small model, for example: ollama pull llama3.2:1b
+    - Pull a small model, for example: ollama pull gemma3:1b
     - Ollama usually runs locally at: http://localhost:11434
     """
 
-    def __init__(self, model_name: str = "llama3.2:1b") -> None:
+    def __init__(self, model_name: str = "gemma3:1b") -> None:
         """Create the local LLM tool.
 
         Inputs:
@@ -46,7 +46,7 @@ class LlmTool:
         #
         # Small first step:
         # Test Ollama in the terminal first:
-        #   ollama run llama3.2:1b
+        #   ollama run gemma3:1b
         #
         # Real version idea:
         # 1. Send a POST request to an Ollama endpoint.
@@ -57,6 +57,14 @@ class LlmTool:
         # Expected return value:
         # A string response from the local model.
         return ""
+
+    def needs_search(self, user_text: str) -> bool:
+        """Ask the local model whether a web search would help."""
+        # Lesson 8 helper:
+        # 1. Build a short prompt that includes user_text.
+        # 2. Ask the LLM to answer with exactly SEARCH or NO_SEARCH.
+        # 3. Return True for SEARCH and False for NO_SEARCH.
+        return False
 
     def answer_with_context(self, user_text: str, context: str) -> str:
         """Answer using tool context and a local Ollama model.

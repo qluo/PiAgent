@@ -30,7 +30,7 @@ Students use Ollama with a small local open model such as `gemma3:1b`.
 
 ## Lesson 8: Tools, Search
 
-Students use the `duckduckgo_search` package to add a web search tool.
+Students use the `ddgs` package to add a web search tool.
 
 ## Lesson 9: Put Everything Together
 

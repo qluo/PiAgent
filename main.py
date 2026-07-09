@@ -29,7 +29,7 @@ def main() -> None:
         wake_word=WakeWordTool(),
         stt=SpeechToTextTool(),
         tts=TextToSpeechTool(),
-        llm=LlmTool(),
+        llm=LlmTool(model_name="gemma3:1b"),
         tools={
             "search": SearchTool(),
         },

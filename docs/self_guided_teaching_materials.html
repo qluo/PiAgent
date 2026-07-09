@@ -363,7 +363,8 @@ gcc --version
 
 arecord -l
 aplay -l
-speaker-test -t wav -c 2</code></pre>
+speaker-test -t wav -c 2
+# Press Ctrl+C to stop speaker-test.</code></pre>
         </div>
         <div class="card green">
           <h3>Local LLM</h3>
@@ -544,16 +545,19 @@ uv run pytest tests/lesson_1</code></pre>
         <li>Open the local <code>faces/</code> folder and look at the picture folders: <code>idle</code>, <code>listening</code>, <code>thinking</code>, <code>speaking</code>, <code>error</code>, <code>capturing</code>, and <code>warmup</code>.</li>
         <li>Run the state test first:<pre><code>uv run pytest tests/lesson_2/test_01_face_state.py</code></pre></li>
         <li>Run the picture folder test:<pre><code>uv run pytest tests/lesson_2/test_02_face_assets.py</code></pre></li>
-        <li>Open <code>face/renderer.py</code>. Implement <code>load()</code> so it reads PNG files from each folder.</li>
-        <li>Read <code>FaceRenderer.__init__()</code>. Notice that <code>faces_dir</code>, <code>frames</code>, <code>frame_indexes</code>, and <code>last_drawn_state</code> are stored on <code>self</code>.</li>
+        <li>Open <code>face/renderer.py</code>. Find the three student TODO functions: <code>load()</code>, <code>draw(state)</code>, and <code>_draw_with_pygame(frame)</code>.</li>
+        <li>Read <code>FaceRenderer.__init__()</code>. Notice that <code>faces_dir</code>, <code>frames</code>, <code>frame_indexes</code>, <code>last_drawn_state</code>, <code>_pygame</code>, and <code>_screen</code> are stored on <code>self</code>.</li>
+        <li>Read the provided helper <code>_setup_display()</code>. It starts <code>pygame</code>, creates a fullscreen window, and stores the screen on <code>self</code>.</li>
+        <li>Implement <code>load()</code> so it reads PNG files from each folder.</li>
         <li>Store the loaded pictures in a dictionary where the key is the state name, such as <code>"thinking"</code>.</li>
         <li>Run the load test before drawing anything:<pre><code>uv run pytest tests/lesson_2/test_03_renderer_load.py</code></pre></li>
         <li>Implement <code>draw(state)</code> so it draws the next picture for the current state.</li>
+        <li>Implement <code>_draw_with_pygame(frame)</code>. It should put one loaded image frame on the screen and call <code>pygame.display.flip()</code>.</li>
         <li>Store <code>self.last_drawn_state = state</code> inside <code>draw()</code> so the test can check which state was drawn.</li>
         <li>Run the draw test:<pre><code>uv run pytest tests/lesson_2/test_04_renderer_draw.py</code></pre></li>
         <li>Open <code>face/controller.py</code>. Implement <code>run_once()</code> so it reads <code>face_state.get()</code> and asks the renderer to draw that state one time.</li>
         <li>Run the controller step test:<pre><code>uv run pytest tests/lesson_2/test_05_controller_run_once.py</code></pre></li>
-        <li>Implement <code>run()</code> so it loads the renderer once, then repeatedly calls <code>run_once()</code> and sleeps briefly.</li>
+        <li>Implement <code>run(self, sleep_seconds: float = 0.1)</code> so it loads the renderer once, then repeatedly calls <code>run_once()</code> and sleeps for <code>sleep_seconds</code>.</li>
         <li>Find <code>Thread(target=face_controller.run, daemon=True).start()</code> in <code>main.py</code>.</li>
         <li>Discuss why the face controller needs a background thread: the picture face should not freeze while the agent waits for input.</li>
       </ol>
@@ -575,12 +579,25 @@ uv run pytest tests/lesson_1</code></pre>
     thinking_04.png</code></pre>
       <pre><code>renderer = FaceRenderer(faces_dir="faces")
 renderer.load()
-renderer.draw("thinking")</code></pre>
+renderer.draw("thinking")
+
+def _setup_display(self):
+    # Provided helper: starts pygame and creates self._screen
+    ...
+
+def _draw_with_pygame(self, frame):
+    # TODO for students:
+    # 1. Return early if pygame or screen is missing.
+    # 2. Read pygame events.
+    # 3. Convert frame to a pygame surface.
+    # 4. Scale, blit, and flip the display.
+    pass</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
         <li>You can explain what <code>FaceState.set()</code> does.</li>
         <li>You can explain why the face controller runs in a thread.</li>
         <li>You can explain how one face state maps to one picture folder.</li>
+        <li>You implemented <code>load()</code>, <code>draw(state)</code>, and <code>_draw_with_pygame(frame)</code>.</li>
         <li>The renderer can show at least one PNG picture from the <code>faces/</code> folder.</li>
       </ul>
       <h3>Test</h3>
@@ -605,7 +622,7 @@ uv run pytest tests/lesson_2</code></pre>
             <li>Blocking functions: <code>wait()</code> pauses until the wake word is heard.</li>
             <li>Audio sample rate: wake word tools often expect 16 kHz audio.</li>
             <li>Tool swapping: the agent still calls <code>wake_word.wait()</code> no matter how the tool works inside.</li>
-            <li>Configuration: <code>__init__()</code> stores settings such as threshold and sample rate.</li>
+            <li>Configuration: <code>__init__()</code> stores settings such as model name, mode, threshold, and sample rate.</li>
           </ul>
         </div>
         <div class="card green">
@@ -627,21 +644,33 @@ uv run pytest tests/lesson_2</code></pre>
       <ol>
         <li>Read <code>FakeWakeWordTool.wait()</code> in <code>demos/lesson1_demo.py</code>.</li>
         <li>Open <code>agent/tools/wake_word.py</code>.</li>
-        <li>Read <code>WakeWordTool.__init__()</code>. Notice <code>model_path</code>, <code>threshold</code>, and <code>sample_rate</code>.</li>
+        <li>Read <code>WakeWordTool.__init__()</code>. Notice <code>model_path</code>, <code>threshold</code>, <code>sample_rate</code>, and <code>mode</code>.</li>
         <li>Keep the same method name: <code>wait()</code>.</li>
-        <li>First implement a keyboard wake word: loop until the user types <code>wake</code>.</li>
-        <li>Then explore <code>openwakeword</code>: load a wake word model, read microphone audio, and check the prediction score.</li>
+        <li>Use <code>mode="keyboard"</code> for tests and early classroom debugging.</li>
+        <li>Use <code>mode="microphone"</code> for the real Raspberry Pi wake word.</li>
+        <li>First implement <code>_wait_for_keyboard_wake()</code>: loop until the user types <code>wake</code>.</li>
+        <li>Then implement <code>_wait_for_microphone_wake()</code>: load the default <code>hey_jarvis</code> model, read microphone audio, and check the prediction score.</li>
         <li>Run the manual microphone demo:<pre><code>uv run python demos/test_wake_word_audio.py</code></pre></li>
         <li>Return from <code>wait()</code> only when the wake word is detected.</li>
       </ol>
       <pre><code>class WakeWordTool:
-    def __init__(self, model_path=None, threshold=0.5, sample_rate=16000):
+    def __init__(self, model_path="hey_jarvis", threshold=0.5, sample_rate=16000, mode="microphone"):
         self.model_path = model_path
         self.threshold = threshold
         self.sample_rate = sample_rate
+        self.mode = mode
 
     def wait(self):
-        # TODO: listen until the wake word is detected
+        if self.mode == "keyboard":
+            return self._wait_for_keyboard_wake()
+        return self._wait_for_microphone_wake()
+
+    def _wait_for_keyboard_wake(self):
+        # TODO: loop until the user types "wake"
+        pass
+
+    def _wait_for_microphone_wake(self):
+        # TODO: listen until openWakeWord detects the wake word
         pass</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
@@ -687,6 +716,7 @@ uv run python demos/test_wake_word_audio.py --threshold 0.3</code></pre>
       <ol>
         <li>Open <code>demos/lesson1_demo.py</code> and find <code>Agent.run()</code>.</li>
         <li>Open <code>agent/agent.py</code> and find the skeleton <code>Agent.run()</code>.</li>
+        <li>Add <code>from face import states</code> at the top so the agent can use named face states.</li>
         <li>Copy the high-level loop idea, not every fake detail.</li>
         <li>Call <code>self.wake_word.wait()</code> when idle.</li>
         <li>Set the face to <code>listening</code>, then call <code>self.stt.listen_and_transcribe()</code>.</li>
@@ -702,6 +732,11 @@ response = self.respond(user_text)
 
 self.face_state.set("speaking")
 self.tts.speak(response)</code></pre>
+      <pre><code>try:
+    agent.run()
+except KeyboardInterrupt:
+    face_state.set(states.IDLE)
+    print("\nPiAgent stopped.")</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
         <li><code>Agent.run()</code> has the full loop shape.</li>
@@ -724,10 +759,10 @@ uv run pytest tests/lesson_4</code></pre>
         <div class="card blue">
           <h3>Concepts To Explore</h3>
           <ul>
-            <li>Recording audio from a microphone.</li>
-            <li>Saving audio as a short WAV file.</li>
+            <li>Listening to live microphone chunks.</li>
+            <li>Voice activity detection: start when speech begins, stop after silence.</li>
             <li>Transcribing audio into text.</li>
-            <li>Recording settings: <code>__init__()</code> stores sample rate, duration, and output file path.</li>
+            <li>Recognition settings: <code>__init__()</code> stores sample rate, max speech length, silence length, and whisper.cpp paths.</li>
           </ul>
         </div>
         <div class="card green">
@@ -741,9 +776,9 @@ uv run pytest tests/lesson_4</code></pre>
       </div>
       <h3>Packages And Tools</h3>
       <ul>
-        <li>Recording option: <code>sounddevice</code> plus Python's built-in <code>wave</code> module.</li>
+        <li>Microphone option: <code>sounddevice</code> plus Python's built-in <code>wave</code> module for the temporary whisper.cpp input.</li>
         <li>Local transcription option: <code>whisper.cpp</code> with a small model such as <code>ggml-base.en.bin</code>.</li>
-        <li>Start simple: record a fixed 3-second clip before trying automatic silence detection.</li>
+        <li>Voice detection idea: listen in tiny chunks, keep chunks when speech starts, then stop after quiet.</li>
       </ul>
       <h3>Steps</h3>
       <ol>
@@ -766,7 +801,17 @@ def listen_and_transcribe(self) -> str:
     # TODO: listen until speech ends
     # TODO: run whisper.cpp
     # TODO: return the transcribed text
-    return ""</code></pre>
+    return ""
+
+def listen_until_silence(self) -> bytes:
+    # TODO: read microphone chunks with sounddevice
+    # TODO: start saving chunks when loudness is high
+    # TODO: stop after silence_seconds of quiet
+    return b""
+
+def loudness(self, audio: bytes) -> float:
+    # TODO: return average loudness for 16-bit microphone audio
+    return 0.0</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
         <li>The microphone records sound.</li>
@@ -789,10 +834,10 @@ uv run pytest tests/lesson_5</code></pre>
         <div class="card blue">
           <h3>Concepts To Explore</h3>
           <ul>
-            <li>Turning text into an audio file.</li>
-            <li>Playing audio through the Raspberry Pi speaker.</li>
+            <li>Turning text into speech audio.</li>
+            <li>Streaming speech directly through the Raspberry Pi speaker.</li>
             <li>Keeping speech code inside a tool.</li>
-            <li>Speech settings: <code>__init__()</code> stores the voice model path and output WAV path.</li>
+            <li>Speech settings: <code>__init__()</code> stores the voice model path, Piper binary, and player binary.</li>
           </ul>
         </div>
         <div class="card green">
@@ -808,7 +853,7 @@ uv run pytest tests/lesson_5</code></pre>
       <ul>
         <li>Local TTS option: Piper.</li>
         <li>Audio playback option: <code>aplay</code> on Raspberry Pi OS.</li>
-        <li>Fallback option for early testing: keep printing <code>Agent: ...</code>.</li>
+        <li>No output WAV is needed: Piper can stream raw audio directly to <code>aplay</code>.</li>
       </ul>
       <h3>Steps</h3>
       <ol>
@@ -927,7 +972,7 @@ uv run pytest tests/lesson_7</code></pre>
       </div>
       <h3>Packages And Tools</h3>
       <ul>
-        <li>Search package: <code>duckduckgo_search</code>.</li>
+        <li>Search package: <code>ddgs</code>.</li>
         <li>Helper class: <code>DDGS</code>.</li>
         <li>Install command: <code>uv pip install -r requirements.txt</code>.</li>
       </ul>
@@ -939,16 +984,25 @@ uv run pytest tests/lesson_7</code></pre>
         <li>Import <code>DDGS</code>.</li>
         <li>Use <code>ddgs.text(...)</code> to fetch one or two results.</li>
         <li>Return a short string containing the title and snippet.</li>
-        <li>Open <code>agent/agent.py</code> and update <code>respond()</code>.</li>
-        <li>If the user asks to “search” or “look up” something, call <code>SearchTool.search()</code>.</li>
+        <li>Open <code>agent/tools/llm.py</code> and add a small decision method such as <code>needs_search(user_text)</code>.</li>
+        <li>Ask the LLM if the question needs current web search results.</li>
+        <li>If the LLM says search is needed, call <code>SearchTool.search()</code>.</li>
         <li>Send the search context into <code>llm.answer_with_context(...)</code>.</li>
+        <li>If the LLM says search is not needed, answer directly with <code>llm.answer(...)</code>.</li>
       </ol>
-      <pre><code>from duckduckgo_search import DDGS
+      <pre><code>from ddgs import DDGS
 
 with DDGS() as ddgs:
     results = list(
         ddgs.text(query, region=self.region, max_results=self.max_results)
-    )</code></pre>
+    )
+
+def respond(self, user_text):
+    if self.llm.needs_search(user_text):
+        context = self.tools["search"].search(user_text)
+        return self.llm.answer_with_context(user_text, context)
+
+    return self.llm.answer(user_text)</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
         <li>The search tool returns a short useful result.</li>
@@ -999,16 +1053,8 @@ uv run pytest tests/lesson_8</code></pre>
       </ul>
       <h3>Steps</h3>
       <ol>
-        <li>Run each tool by itself before running the whole agent.</li>
+        <li>Confirm the runtime setup is complete: microphone, speaker, display, Ollama, whisper.cpp, Piper, and models.</li>
         <li>Confirm Ollama is running and <code>ollama run gemma3:1b</code> works.</li>
-        <li>Confirm <code>whisper.cpp/build/bin/whisper-cli</code> exists.</li>
-        <li>Confirm <code>models/ggml-base.en.bin</code> exists.</li>
-        <li>Confirm Piper can speak through <code>aplay</code>.</li>
-        <li>Confirm the microphone and speaker are listed by <code>arecord -l</code> and <code>aplay -l</code>.</li>
-        <li>Open <code>main.py</code> and check that every tool is created there.</li>
-        <li>Implement <code>FaceController.run()</code> so it reads <code>face_state.get()</code>.</li>
-        <li>Implement <code>FaceRenderer.load()</code> to load image assets from the <code>faces/</code> folders.</li>
-        <li>Implement <code>FaceRenderer.draw(state)</code> to draw the next frame for the current state.</li>
         <li>Run <code>python3 main.py</code>.</li>
         <li>Test the full path: wake, speak question, transcribe, think, answer, return to idle.</li>
         <li>If something breaks, test the tool from that lesson again by itself.</li>
