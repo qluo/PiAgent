@@ -1,3 +1,8 @@
+from pathlib import Path
+
+from PIL import Image
+
+
 class FaceRenderer:
     def __init__(self, faces_dir: str = "faces") -> None:
         """Create the face renderer.
@@ -12,6 +17,8 @@ class FaceRenderer:
         self.frames: dict[str, list[object]] = {}
         self.frame_indexes: dict[str, int] = {}
         self.last_drawn_state: str | None = None
+        self._pygame = None
+        self._screen = None
 
     def load(self) -> dict[str, list[object]]:
         """Load face assets from disk.
@@ -26,26 +33,20 @@ class FaceRenderer:
         Side effects:
         - Stores the same dictionary on self.frames.
         """
-        # Lesson 2: Face Renderer
-        #
-        # Goal:
-        # Load the Mini panda bot PNG files from the faces/ folders.
-        #
-        # Suggested packages:
-        # - pathlib: find image files in folders.
-        # - Pillow: load PNG files if you render with Pillow/Tkinter.
-        # - pygame: load PNG files if you render with pygame.
-        #
-        # Concept to learn:
-        # Each folder name is a face state. Each PNG inside that folder is one
-        # animation frame for that state.
-        #
-        # Small first step:
-        # Build a dictionary like:
-        #   self.frames["thinking"] = [image1, image2, image3]
-        #
-        # Expected result:
-        # After load() runs, draw("thinking") can find thinking frames.
+        faces_path = Path(self.faces_dir)
+        self.frames = {}
+        self.frame_indexes = {}
+
+        for state_dir in sorted(path for path in faces_path.iterdir() if path.is_dir()):
+            frames = [
+                Image.open(png_path).convert("RGBA")
+                for png_path in sorted(state_dir.glob("*.png"))
+            ]
+            if frames:
+                self.frames[state_dir.name] = frames
+                self.frame_indexes[state_dir.name] = 0
+
+        self._setup_display()
         return self.frames
 
     def draw(self, state: str) -> None:
@@ -61,28 +62,55 @@ class FaceRenderer:
         - Draws one frame.
         - Usually updates self.last_drawn_state and a frame index.
         """
-        # Lesson 2: Face Renderer
-        #
-        # Goal:
-        # Show the next PNG frame for the requested state.
-        #
-        # Suggested package:
-        # - pygame: good for fullscreen display on Raspberry Pi.
-        #
-        # Concept to learn:
-        # Animation is just showing images in order:
-        # frame 1, frame 2, frame 3, then back to frame 1.
-        #
-        # Small first step:
-        # Draw the first image for the state without animation.
-        #
-        # Real version idea:
-        # 1. Look up the frame list for state.
-        # 2. Keep a frame index for each state.
-        # 3. Draw the current frame.
-        # 4. Move the frame index forward.
-        # 5. Store self.last_drawn_state = state so your test can check it.
-        #
-        # Expected return value:
-        # Nothing. The result appears on the display.
-        pass
+        if not self.frames:
+            self.load()
+
+        frames = self.frames.get(state)
+        if not frames:
+            raise ValueError(f"No face frames loaded for state: {state}")
+
+        frame_index = self.frame_indexes.get(state, 0)
+        frame = frames[frame_index]
+        self.frame_indexes[state] = (frame_index + 1) % len(frames)
+        self.last_drawn_state = state
+
+        if self._screen is not None and self._pygame is not None:
+            self._draw_with_pygame(frame)
+
+    def _setup_display(self) -> None:
+        if self._screen is not None:
+            return
+
+        try:
+            import pygame
+
+            pygame.init()
+            display_info = pygame.display.Info()
+            width = display_info.current_w or 800
+            height = display_info.current_h or 480
+            self._screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+            pygame.display.set_caption("PiAgent")
+            self._pygame = pygame
+        except Exception:
+            self._pygame = None
+            self._screen = None
+
+    def _draw_with_pygame(self, frame: Image.Image) -> None:
+        pygame = self._pygame
+        screen = self._screen
+        if pygame is None or screen is None:
+            return
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+
+        screen_width, screen_height = screen.get_size()
+        image = frame.copy()
+        image.thumbnail((screen_width, screen_height), Image.Resampling.LANCZOS)
+        surface = pygame.image.fromstring(image.tobytes(), image.size, image.mode)
+        x = (screen_width - image.width) // 2
+        y = (screen_height - image.height) // 2
+        screen.fill((0, 0, 0))
+        screen.blit(surface, (x, y))
+        pygame.display.flip()

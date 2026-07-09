@@ -1,5 +1,6 @@
 from face.renderer import FaceRenderer
 from face.state import FaceState
+import time
 
 
 class FaceController:
@@ -26,50 +27,26 @@ class FaceController:
         Output:
         - None. Draws exactly one frame as a side effect.
         """
-        # Lesson 2: Testable Face Controller Step
-        #
-        # Goal:
-        # Make one small controller step easy to test before writing the
-        # forever loop in run().
-        #
-        # Small first step:
-        # 1. Read the current state with self.face_state.get().
-        # 2. Call self.renderer.draw(state).
-        #
-        # Expected return value:
-        # Nothing. This method draws exactly one frame.
-        pass
+        if self.renderer is None:
+            self.renderer = FaceRenderer()
 
-    def run(self) -> None:
+        state = self.face_state.get()
+        self.renderer.draw(state)
+
+    def run(self, sleep_seconds: float = 0.1) -> None:
         """Continuously render the face matching the latest FaceState.
 
         Inputs:
-        - None directly. Reads self.face_state and uses self.renderer.
+        - sleep_seconds: pause between frames. Reads self.face_state and uses
+          self.renderer.
 
         Output:
         - None. This method keeps running until the program is stopped.
         """
-        # Lesson 2: Face Controller
-        #
-        # Goal:
-        # Keep the face display updated while the agent is doing other work.
-        #
-        # Concept to learn:
-        # This method runs in a background thread. It should loop forever:
-        # read the current state, draw that state's next frame, pause briefly,
-        # and repeat.
-        #
-        # Suggested package:
-        # - time.sleep: pause between frames.
-        #
-        # Small first step:
-        # Print the current state whenever it changes.
-        #
-        # Real version idea:
-        # 1. Call self.renderer.load() once before the loop.
-        # 2. Inside the loop, call self.run_once().
-        # 3. Sleep for a short time, such as 0.1 seconds.
-        #
-        # Expected return value:
-        # Nothing. This method keeps running.
-        pass
+        if self.renderer is None:
+            self.renderer = FaceRenderer()
+
+        self.renderer.load()
+        while True:
+            self.run_once()
+            time.sleep(sleep_seconds)
