@@ -84,7 +84,7 @@ when testing real hardware.
 ## Raspberry Pi System Packages
 
 On Raspberry Pi OS, install the system tools used by audio, display, and local
-build steps:
+build steps. This includes `cmake`, which is required to build `whisper.cpp`:
 
 ```bash
 sudo apt update
@@ -93,6 +93,14 @@ sudo apt install -y \
   portaudio19-dev alsa-utils \
   python3-dev python3-pip \
   libsdl2-dev
+```
+
+Check that the build tools are installed:
+
+```bash
+git --version
+cmake --version
+gcc --version
 ```
 
 Check that the microphone and speaker are visible:

@@ -26,7 +26,7 @@ Students replace printed responses with spoken audio.
 
 ## Lesson 7: LLM
 
-Students use Ollama with a small local open model such as `llama3.2:1b`.
+Students use Ollama with a small local open model such as `gemma3:1b`.
 
 ## Lesson 8: Tools, Search
 
