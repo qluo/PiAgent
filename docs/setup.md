@@ -64,15 +64,166 @@ Some skeleton classes have an `__init__()` method that stores settings before
 the real implementation is written. For example:
 
 ```python
-WakeWordTool(threshold=0.5, sample_rate=16000)
-SpeechToTextTool(seconds=3.0, output_wav="input.wav")
-TextToSpeechTool(output_wav="output.wav")
+WakeWordTool(model_path="hey_jarvis", threshold=0.5, sample_rate=16000)
+SpeechToTextTool(
+    max_seconds=10.0,
+    silence_seconds=1.0,
+    model_path="models/ggml-base.en.bin",
+    whisper_binary="whisper.cpp/build/bin/whisper-cli",
+)
+TextToSpeechTool(
+    voice_model_path="models/piper/en_US-lessac-low.onnx",
+)
 SearchTool(max_results=1, region="us-en")
 FaceRenderer(faces_dir="faces")
 ```
 
 Students can keep the defaults at first, then change one setting at a time
 when testing real hardware.
+
+## Raspberry Pi System Packages
+
+On Raspberry Pi OS, install the system tools used by audio, display, and local
+build steps:
+
+```bash
+sudo apt update
+sudo apt install -y \
+  git cmake build-essential pkg-config \
+  portaudio19-dev alsa-utils \
+  python3-dev python3-pip \
+  libsdl2-dev
+```
+
+Check that the microphone and speaker are visible:
+
+```bash
+arecord -l
+aplay -l
+```
+
+If your speaker does not play, test it directly:
+
+```bash
+speaker-test -t wav -c 2
+```
+
+## Ollama Setup
+
+Install Ollama using the official instructions:
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+The current code uses `gemma3:1b`:
+
+```bash
+ollama pull gemma3:1b
+ollama run gemma3:1b
+```
+
+Keep Ollama running in the background when the agent starts. The Python code
+expects Ollama at:
+
+```text
+http://localhost:11434
+```
+
+## whisper.cpp Setup For Speech-To-Text
+
+The STT tool listens to the microphone until speech ends, saves a temporary WAV,
+and sends that WAV to `whisper.cpp`.
+
+Build `whisper.cpp` from the project folder:
+
+```bash
+git clone https://github.com/ggml-org/whisper.cpp.git
+cmake -S whisper.cpp -B whisper.cpp/build
+cmake --build whisper.cpp/build -j 4
+```
+
+Create a model folder and download a small English model:
+
+```bash
+mkdir -p models
+curl -L \
+  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin \
+  -o models/ggml-base.en.bin
+```
+
+The default code expects:
+
+```text
+whisper.cpp/build/bin/whisper-cli
+models/ggml-base.en.bin
+```
+
+Test whisper.cpp with any small WAV file:
+
+```bash
+whisper.cpp/build/bin/whisper-cli \
+  -m models/ggml-base.en.bin \
+  -f path/to/test.wav \
+  -nt
+```
+
+If the Pi feels slow, try `ggml-tiny.en.bin` instead and update
+`SpeechToTextTool(model_path=...)`.
+
+## Piper Setup For Text-To-Speech
+
+Install Piper so the `piper` command is available. The easiest classroom path is
+to use a Piper release build for your Raspberry Pi CPU, then put the `piper`
+binary somewhere on `PATH`.
+
+Create a voice model folder:
+
+```bash
+mkdir -p models/piper
+```
+
+Download a Piper voice model and its JSON config into that folder. For example,
+using the low-size US English Lessac voice:
+
+```bash
+curl -L \
+  https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/low/en_US-lessac-low.onnx \
+  -o models/piper/en_US-lessac-low.onnx
+
+curl -L \
+  https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/low/en_US-lessac-low.onnx.json \
+  -o models/piper/en_US-lessac-low.onnx.json
+```
+
+The default code expects:
+
+```text
+models/piper/en_US-lessac-low.onnx
+```
+
+Test Piper and speaker playback:
+
+```bash
+echo "Hello from Pi Agent" | \
+  piper --model models/piper/en_US-lessac-low.onnx --output-raw | \
+  aplay -r 22050 -f S16_LE -t raw -
+```
+
+## Display Setup
+
+The face renderer uses `pygame` fullscreen. Run the agent from the Raspberry Pi
+desktop session or another session with display access.
+
+If pygame cannot open a display, check:
+
+```bash
+echo $DISPLAY
+python -m pygame.examples.aliens
+```
+
+For a small HDMI display, make sure Raspberry Pi OS can see the screen before
+starting the agent.
 
 ## Run The Wake Word Audio Demo
 
@@ -89,16 +240,32 @@ If detection is too hard, try a lower threshold:
 uv run python demos/test_wake_word_audio.py --threshold 0.3
 ```
 
-## Ollama Setup
+## Run The Full Agent On Raspberry Pi
 
-Install Ollama using the official instructions:
+After the Python environment, Ollama, whisper.cpp, Piper, microphone, speaker,
+and display are ready, run:
 
 ```bash
-curl -fsSL https://ollama.com/install.sh | sh
+uv run python main.py
 ```
 
-Pull a small local model:
+Expected flow:
+
+1. The face appears on the display.
+2. Say "Hey Jarvis" to wake the agent.
+3. Ask a question.
+4. The agent listens until you stop speaking.
+5. whisper.cpp turns your speech into text.
+6. Ollama answers with `gemma3:1b`.
+7. Piper speaks the answer through the speaker.
+8. The face returns to idle.
+
+If something fails, test one tool at a time:
 
 ```bash
-ollama pull llama3.2:1b
+uv run python demos/test_wake_word_audio.py
+uv run pytest tests/lesson_5
+uv run pytest tests/lesson_6
+uv run pytest tests/lesson_7
+uv run pytest tests/lesson_8
 ```

@@ -343,8 +343,56 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 
 curl -fsSL https://ollama.com/install.sh | sh
-ollama pull llama3.2:1b
+ollama pull gemma3:1b
 uv run python demos/lesson1_demo.py</code></pre>
+    </section>
+
+    <section>
+      <h2>Raspberry Pi Runtime Setup</h2>
+      <p>The Python lessons run with <code>uv</code>, but the full voice assistant also needs a few local programs, model files, and working audio/display hardware on the Raspberry Pi.</p>
+      <div class="two">
+        <div class="card blue">
+          <h3>Install System Tools</h3>
+          <p>Install build tools, audio tools, and display support before testing the full agent.</p>
+          <pre><code>sudo apt update
+sudo apt install -y git cmake build-essential pkg-config portaudio19-dev alsa-utils python3-dev python3-pip libsdl2-dev
+
+arecord -l
+aplay -l
+speaker-test -t wav -c 2</code></pre>
+        </div>
+        <div class="card green">
+          <h3>Local LLM</h3>
+          <p>The current agent code uses Ollama with <code>gemma3:1b</code> at <code>localhost:11434</code>.</p>
+          <pre><code>curl -fsSL https://ollama.com/install.sh | sh
+ollama pull gemma3:1b
+ollama run gemma3:1b</code></pre>
+        </div>
+      </div>
+      <div class="two">
+        <div class="card yellow">
+          <h3>Speech To Text</h3>
+          <p>The STT tool listens until speech ends, then sends a temporary WAV chunk to <code>whisper.cpp</code>.</p>
+          <pre><code>git clone https://github.com/ggml-org/whisper.cpp.git
+cmake -S whisper.cpp -B whisper.cpp/build
+cmake --build whisper.cpp/build -j 4
+
+mkdir -p models
+curl -L https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin -o models/ggml-base.en.bin</code></pre>
+        </div>
+        <div class="card pink">
+          <h3>Text To Speech</h3>
+          <p>The TTS tool streams Piper audio directly into <code>aplay</code>.</p>
+          <pre><code>mkdir -p models/piper
+curl -L https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/low/en_US-lessac-low.onnx -o models/piper/en_US-lessac-low.onnx
+curl -L https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/low/en_US-lessac-low.onnx.json -o models/piper/en_US-lessac-low.onnx.json
+
+echo "Hello from Pi Agent" | piper --model models/piper/en_US-lessac-low.onnx --output-raw | aplay -r 22050 -f S16_LE -t raw -</code></pre>
+        </div>
+      </div>
+      <div class="callout">
+        <p>Default paths used by the code: <code>whisper.cpp/build/bin/whisper-cli</code>, <code>models/ggml-base.en.bin</code>, and <code>models/piper/en_US-lessac-low.onnx</code>. If you put files somewhere else, update the tool settings in <code>main.py</code>.</p>
+      </div>
     </section>
 
     <section>
@@ -688,23 +736,23 @@ uv run pytest tests/lesson_4</code></pre>
       <h3>Steps</h3>
       <ol>
         <li>Open <code>agent/tools/stt.py</code>.</li>
-        <li>Read <code>SpeechToTextTool.__init__()</code>. Notice <code>sample_rate</code>, <code>seconds</code>, and <code>output_wav</code>.</li>
+        <li>Read <code>SpeechToTextTool.__init__()</code>. Notice <code>sample_rate</code>, <code>max_seconds</code>, <code>silence_seconds</code>, <code>model_path</code>, and <code>whisper_binary</code>.</li>
         <li>Keep the method name <code>listen_and_transcribe()</code>.</li>
-        <li>Use <code>sounddevice</code> to record a short microphone clip.</li>
-        <li>Save the clip as <code>input.wav</code>.</li>
-        <li>Run a local transcription command, such as <code>whisper.cpp</code>.</li>
-        <li>Read the transcription result and return it as a string.</li>
+        <li>Use <code>sounddevice</code> to listen in short chunks.</li>
+        <li>Start collecting chunks when the sound is loud enough to be speech.</li>
+        <li>Stop collecting chunks after a short silence.</li>
+        <li>Send the captured speech to <code>whisper.cpp</code>.</li>
+        <li>Return the transcription as a string.</li>
         <li>Print the transcription while debugging so you can see what the agent heard.</li>
       </ol>
-      <pre><code>def __init__(self, sample_rate=16000, seconds=3.0, output_wav="input.wav"):
+      <pre><code>def __init__(self, sample_rate=16000, max_seconds=10.0, silence_seconds=1.0):
     self.sample_rate = sample_rate
-    self.seconds = seconds
-    self.output_wav = output_wav
+    self.max_seconds = max_seconds
+    self.silence_seconds = silence_seconds
 
 def listen_and_transcribe(self) -> str:
-    # TODO: record microphone audio
-    # TODO: save input.wav
-    # TODO: run local speech-to-text
+    # TODO: listen until speech ends
+    # TODO: run whisper.cpp
     # TODO: return the transcribed text
     return ""</code></pre>
       <h3>Checkpoint</h3>
@@ -753,20 +801,21 @@ uv run pytest tests/lesson_5</code></pre>
       <h3>Steps</h3>
       <ol>
         <li>Open <code>agent/tools/tts.py</code>.</li>
-        <li>Read <code>TextToSpeechTool.__init__()</code>. Notice <code>voice_model_path</code> and <code>output_wav</code>.</li>
+        <li>Read <code>TextToSpeechTool.__init__()</code>. Notice <code>voice_model_path</code>, <code>piper_binary</code>, and <code>player_binary</code>.</li>
         <li>Keep the method name <code>speak(text)</code>.</li>
         <li>Install or prepare a local TTS engine such as Piper.</li>
-        <li>Generate a WAV file from a short sentence.</li>
-        <li>Play the WAV file through the speaker.</li>
+        <li>Send text into Piper.</li>
+        <li>Stream Piper's raw audio into <code>aplay</code>.</li>
         <li>Call <code>tts.speak(response)</code> from the agent only after the face switches to <code>speaking</code>.</li>
       </ol>
-      <pre><code>def __init__(self, voice_model_path=None, output_wav="output.wav"):
+      <pre><code>def __init__(self, voice_model_path, piper_binary="piper", player_binary="aplay"):
     self.voice_model_path = voice_model_path
-    self.output_wav = output_wav
+    self.piper_binary = piper_binary
+    self.player_binary = player_binary
 
 def speak(self, text: str):
-    # TODO: turn text into audio
-    # TODO: play the audio
+    # TODO: send text to Piper
+    # TODO: stream audio to aplay
     pass</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
@@ -808,22 +857,22 @@ uv run pytest tests/lesson_6</code></pre>
       <h3>Packages And Tools</h3>
       <ul>
         <li>Runtime: Ollama.</li>
-        <li>Small model to start: <code>llama3.2:1b</code>.</li>
+        <li>Small model to start: <code>gemma3:1b</code>.</li>
         <li>Python HTTP option: <code>requests</code>, or Python's built-in <code>urllib.request</code>.</li>
         <li>Local endpoint: <code>http://localhost:11434</code>.</li>
       </ul>
       <h3>Steps</h3>
       <ol>
         <li>Install Ollama on the Raspberry Pi or development computer.</li>
-        <li>Pull the model: <code>ollama pull llama3.2:1b</code>.</li>
-        <li>Test it in the terminal: <code>ollama run llama3.2:1b</code>.</li>
+        <li>Pull the model: <code>ollama pull gemma3:1b</code>.</li>
+        <li>Test it in the terminal: <code>ollama run gemma3:1b</code>.</li>
         <li>Open <code>agent/tools/llm.py</code>.</li>
         <li>Implement <code>answer(user_text)</code> so it sends the user text to Ollama.</li>
         <li>Return only the model's answer string.</li>
         <li>Implement <code>answer_with_context(user_text, context)</code> later for tool results.</li>
       </ol>
       <pre><code>class LlmTool:
-    def __init__(self, model_name: str = "llama3.2:1b"):
+    def __init__(self, model_name: str = "gemma3:1b"):
         self.model_name = model_name
         self.base_url = "http://localhost:11434"</code></pre>
       <h3>Checkpoint</h3>
@@ -874,7 +923,7 @@ uv run pytest tests/lesson_7</code></pre>
       <ol>
         <li>Open <code>agent/tools/search.py</code>.</li>
         <li>Read <code>SearchTool.__init__()</code>. Notice <code>max_results</code> and <code>region</code>.</li>
-        <li>Install <code>duckduckgo-search</code> when you are ready.</li>
+        <li>Install <code>ddgs</code> when you are ready.</li>
         <li>Import <code>DDGS</code>.</li>
         <li>Use <code>ddgs.text(...)</code> to fetch one or two results.</li>
         <li>Return a short string containing the title and snippet.</li>
@@ -929,12 +978,21 @@ uv run pytest tests/lesson_8</code></pre>
       <h3>Packages And Tools</h3>
       <ul>
         <li>Face rendering option: <code>pygame</code> for a fullscreen Pi display.</li>
+        <li>Wake word option: <code>openwakeword</code> with the default <code>hey_jarvis</code> model.</li>
+        <li>Speech-to-text option: <code>whisper.cpp</code> with <code>models/ggml-base.en.bin</code>.</li>
+        <li>Text-to-speech option: Piper with <code>models/piper/en_US-lessac-low.onnx</code>.</li>
+        <li>Local LLM option: Ollama with <code>gemma3:1b</code>.</li>
         <li>Face asset option: PNG images inside <code>faces/idle</code>, <code>faces/listening</code>, <code>faces/thinking</code>, and <code>faces/speaking</code>.</li>
         <li>System check tools: terminal logs and small <code>print()</code> messages.</li>
       </ul>
       <h3>Steps</h3>
       <ol>
         <li>Run each tool by itself before running the whole agent.</li>
+        <li>Confirm Ollama is running and <code>ollama run gemma3:1b</code> works.</li>
+        <li>Confirm <code>whisper.cpp/build/bin/whisper-cli</code> exists.</li>
+        <li>Confirm <code>models/ggml-base.en.bin</code> exists.</li>
+        <li>Confirm Piper can speak through <code>aplay</code>.</li>
+        <li>Confirm the microphone and speaker are listed by <code>arecord -l</code> and <code>aplay -l</code>.</li>
         <li>Open <code>main.py</code> and check that every tool is created there.</li>
         <li>Implement <code>FaceController.run()</code> so it reads <code>face_state.get()</code>.</li>
         <li>Implement <code>FaceRenderer.load()</code> to load image assets from the <code>faces/</code> folders.</li>
