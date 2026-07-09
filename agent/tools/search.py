@@ -1,15 +1,15 @@
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 
 
 class SearchTool:
     """Web search tool using DuckDuckGo search.
 
     This follows the original Raspberry Pi agent repo's simple approach:
-    use the `duckduckgo_search` package and its `DDGS` helper.
+    use the `ddgs` package and its `DDGS` helper.
 
     Setup idea:
     - Install project packages: uv pip install -r requirements.txt
-    - Import DDGS: from duckduckgo_search import DDGS
+    - Import DDGS: from ddgs import DDGS
     """
 
     def __init__(self, max_results: int = 1, region: str = "us-en") -> None:
