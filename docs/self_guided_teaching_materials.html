@@ -383,11 +383,19 @@ curl -L https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.b
         <div class="card pink">
           <h3>Text To Speech</h3>
           <p>The TTS tool streams Piper audio directly into <code>aplay</code>.</p>
-          <pre><code>mkdir -p models/piper
+          <pre><code>uname -m
+mkdir -p tools
+cd tools
+curl -L https://github.com/rhasspy/piper/releases/latest/download/piper_linux_aarch64.tar.gz -o piper.tar.gz
+tar -xzf piper.tar.gz
+cd ..
+tools/piper/piper --help
+
+mkdir -p models/piper
 curl -L https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/low/en_US-lessac-low.onnx -o models/piper/en_US-lessac-low.onnx
 curl -L https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/low/en_US-lessac-low.onnx.json -o models/piper/en_US-lessac-low.onnx.json
 
-echo "Hello from Pi Agent" | piper --model models/piper/en_US-lessac-low.onnx --output-raw | aplay -r 22050 -f S16_LE -t raw -</code></pre>
+echo "Hello from Pi Agent" | tools/piper/piper --model models/piper/en_US-lessac-low.onnx --output-raw | aplay -r 22050 -f S16_LE -t raw -</code></pre>
         </div>
       </div>
       <div class="callout">

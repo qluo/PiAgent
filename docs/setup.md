@@ -173,9 +173,34 @@ If the Pi feels slow, try `ggml-tiny.en.bin` instead and update
 
 ## Piper Setup For Text-To-Speech
 
-Install Piper so the `piper` command is available. The easiest classroom path is
-to use a Piper release build for your Raspberry Pi CPU, then put the `piper`
-binary somewhere on `PATH`.
+The voice model files are not the Piper program. Install the Piper binary first.
+
+Check your Raspberry Pi OS architecture:
+
+```bash
+uname -m
+```
+
+If it prints `aarch64`, use the 64-bit Linux release:
+
+```bash
+mkdir -p tools
+cd tools
+curl -L \
+  https://github.com/rhasspy/piper/releases/latest/download/piper_linux_aarch64.tar.gz \
+  -o piper.tar.gz
+tar -xzf piper.tar.gz
+cd ..
+```
+
+Test the local Piper binary:
+
+```bash
+tools/piper/piper --help
+```
+
+If `uname -m` prints `armv7l`, you are using 32-bit Raspberry Pi OS. For this
+classroom setup, use 64-bit Raspberry Pi OS so the `aarch64` Piper release works.
 
 Create a voice model folder:
 
@@ -206,9 +231,12 @@ Test Piper and speaker playback:
 
 ```bash
 echo "Hello from Pi Agent" | \
-  piper --model models/piper/en_US-lessac-low.onnx --output-raw | \
+  tools/piper/piper --model models/piper/en_US-lessac-low.onnx --output-raw | \
   aplay -r 22050 -f S16_LE -t raw -
 ```
+
+If the Python code uses `piper_binary="piper"`, either change it to
+`piper_binary="tools/piper/piper"` or add `tools/piper` to your `PATH`.
 
 ## Display Setup
 
