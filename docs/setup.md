@@ -102,3 +102,26 @@ Pull a small local model:
 ```bash
 ollama pull llama3.2:1b
 ```
+
+## Use Ollama On Another Machine
+
+`LlmTool` can send requests to any machine running the Ollama-compatible API.
+Leave the default unchanged for a model on the Pi, or configure the remote
+server before starting the agent:
+
+```bash
+export PI_AGENT_OLLAMA_URL="http://192.168.1.50:11434"
+uv run python main.py
+```
+
+You can also configure it directly in Python:
+
+```python
+LlmTool(model_name="gemma3:1b", base_url="http://192.168.1.50:11434")
+```
+
+On the remote computer, Ollama must listen on an address reachable from the Pi
+and have the requested model installed. Do not expose Ollama's port directly
+to the public internet: it has no built-in authentication. Prefer a private
+network such as Tailscale, or put it behind an authenticated HTTPS reverse
+proxy or SSH tunnel.
