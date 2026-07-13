@@ -1,4 +1,4 @@
-from agent.agent import Agent
+from agent.agent_with_memory import AgentWithMemory
 from agent.tools.memory import MemoryTool
 
 
@@ -14,7 +14,7 @@ class RecordingLlm:
 def test_remember_command_saves_fact_without_calling_llm(tmp_path):
     llm = RecordingLlm()
     memory = MemoryTool(tmp_path)
-    agent = Agent(None, None, None, None, llm, {}, memory=memory)
+    agent = AgentWithMemory(None, None, None, None, llm, {}, memory=memory)
     agent.agents_md = "Be helpful."
 
     response = agent.respond("Remember that my favorite color is blue")
@@ -30,7 +30,7 @@ def test_agent_uses_memory_in_order_and_records_answer(tmp_path):
     memory = MemoryTool(tmp_path)
     memory.remember("my name is Sam")
     memory.record_turn("Hi", "Hello Sam")
-    agent = Agent(None, None, None, None, llm, {}, memory=memory)
+    agent = AgentWithMemory(None, None, None, None, llm, {}, memory=memory)
     agent.agents_md = "Be concise."
 
     assert agent.respond("What is my name?") == "A helpful answer"

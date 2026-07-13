@@ -2,7 +2,6 @@ from threading import Thread
 
 from agent.agent import Agent
 from agent.tools.llm import LlmTool
-from agent.tools.memory import MemoryTool
 from agent.tools.search import SearchTool
 from agent.tools.stt import SpeechToTextTool
 from agent.tools.tts import TextToSpeechTool
@@ -36,7 +35,6 @@ def main() -> None:
         tools={
             "search": SearchTool(),
         },
-        memory=MemoryTool(),
     )
     agent.run()
 
