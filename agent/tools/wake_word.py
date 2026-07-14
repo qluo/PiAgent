@@ -72,9 +72,33 @@ class WakeWordTool:
     def _wait_for_microphone_wake(self) -> None:
         """Listen to microphone audio and check openWakeWord scores."""
         # TODO for students:
-        # 1. Load an openWakeWord model.
-        # 2. Open the microphone with sounddevice.
-        # 3. Read short audio chunks.
-        # 4. Ask the wake word model for prediction scores.
-        # 5. Return when a score is above self.threshold.
+        # 1. Import Model from openwakeword.model, sounddevice as sd, and numpy
+        #    as np.
+        # 2. Create the wake word model once, before opening the microphone:
+        #      model = Model(wakeword_models=[self.model_path])
+        #    The default model name is "hey_jarvis". If you use a downloaded
+        #    model, self.model_path can be its .onnx or .tflite file path.
+        # 3. Make a variable such as detected = False. The callback will change
+        #    it to True when the model hears the wake word.
+        # 4. Write a callback with these four inputs. Its first line should be
+        #    nonlocal detected so it can change the flag created outside it:
+        #      def callback(indata, frames, time_info, status):
+        #    If status is not empty, print it while debugging. The indata value
+        #    is one short microphone chunk.
+        # 5. Open sd.InputStream with samplerate=self.sample_rate, channels=1,
+        #    dtype="int16", blocksize=CHUNK_SIZE, and callback=callback.
+        #    openWakeWord expects 16-bit, 16 kHz, mono PCM samples. CHUNK_SIZE
+        #    is 1280 samples, which is 80 ms at 16 kHz.
+        # 6. Inside callback, make a one-dimensional NumPy array of int16 audio
+        #    samples, for example: audio_chunk = indata[:, 0].copy().
+        # 7. Score that chunk with prediction = model.predict(audio_chunk).
+        #    prediction is a dictionary such as {"hey_jarvis": 0.82}. While
+        #    debugging, print prediction so you can see the exact model key.
+        # 8. Read the score for your model (or the largest score in prediction).
+        #    If it is greater than or equal to self.threshold, set detected=True.
+        # 9. Keep the InputStream open in a small loop until detected is True,
+        #    then leave the with block and return. sd.sleep(100) is an easy way
+        #    to keep the main thread alive while the callback receives audio.
+        # 10. Keep this callback small: do not run STT, TTS, or the LLM here.
+        #     Its only job is to score microphone chunks and notice the wake word.
         pass
