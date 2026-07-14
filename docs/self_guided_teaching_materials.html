@@ -656,7 +656,7 @@ uv run pytest tests/lesson_2</code></pre>
         <li>Use <code>mode="keyboard"</code> for tests and early classroom debugging.</li>
         <li>Use <code>mode="microphone"</code> for the real Raspberry Pi wake word.</li>
         <li>First implement <code>_wait_for_keyboard_wake()</code>: loop until the user types <code>wake</code>.</li>
-        <li>Then implement <code>_wait_for_microphone_wake()</code>: load the default <code>hey_jarvis</code> model, open a 16 kHz mono <code>sounddevice.InputStream</code>, and use its callback to score each audio chunk.</li>
+        <li>Then implement <code>_wait_for_microphone_wake()</code>: load the default <code>hey_jarvis</code> model, use the microphone callback to put 16 kHz mono audio chunks into a queue, and score each chunk in a simple loop.</li>
         <li>Run the manual microphone demo:<pre><code>uv run python demos/test_wake_word_audio.py</code></pre></li>
         <li>Return from <code>wait()</code> only when the wake word is detected.</li>
       </ol>
@@ -677,30 +677,13 @@ uv run pytest tests/lesson_2</code></pre>
         pass
 
     def _wait_for_microphone_wake(self):
-        # 1. Import: from openwakeword.model import Model
-        #    Also import sounddevice as sd and numpy as np.
-        # 2. Load the model once before opening the microphone:
-        #    model = Model(wakeword_models=[self.model_path])
-        #    self.model_path defaults to "hey_jarvis". It can also be a local
-        #    .onnx or .tflite model file path.
-        # 3. Set detected = False. Define a callback with four inputs. Its first
-        #    line should be nonlocal detected so it can change that outer flag:
-        #    def callback(indata, frames, time_info, status):
-        #    Print status while debugging if it is not empty.
-        # 4. Open sd.InputStream with samplerate=self.sample_rate, channels=1,
-        #    dtype="int16", blocksize=CHUNK_SIZE, and callback=callback.
-        #    openWakeWord needs 16-bit, 16 kHz, mono audio. CHUNK_SIZE is 1280
-        #    samples, which is 80 ms of audio at 16 kHz.
-        # 5. In callback, turn indata into one-dimensional int16 samples:
-        #    audio_chunk = indata[:, 0].copy()
-        # 6. Score it: prediction = model.predict(audio_chunk)
-        #    prediction is a dictionary, for example {"hey_jarvis": 0.82}.
-        #    Print it while debugging to see the exact model key and score.
-        # 7. If the model score (or the largest score in prediction) is at least
-        #    self.threshold, set detected = True.
-        # 8. Keep the stream open in a loop until detected is True. Use
-        #    sd.sleep(100) so callbacks keep arriving, then return.
-        # 9. Keep the callback small: only score audio and detect the wake word.
+        # 1. Load the openWakeWord Model.
+        # 2. Create audio_queue = Queue().
+        # 3. Make audio_callback(indata, _frames, _time, status). Inside it, add
+        #    one mono audio chunk with audio_queue.put(indata[:, 0].copy()).
+        # 4. Open sd.InputStream(..., callback=audio_callback).
+        # 5. In a loop, score each chunk with model.predict(audio_chunk).
+        # 6. Return when max(scores.values()) reaches self.threshold.
         pass</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
