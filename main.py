@@ -28,10 +28,7 @@ def main() -> None:
         face_state=face_state,
         wake_word=WakeWordTool(),
         stt=SpeechToTextTool(),
-        tts=TextToSpeechTool(
-            voice_model_path="models/piper/en_US-lessac-low.onnx",
-            piper_binary="tools/piper/piper"
-        ),
+        tts=TextToSpeechTool(),
         llm=LlmTool(model_name="gemma3:1b"),
         tools={
             "search": SearchTool(),

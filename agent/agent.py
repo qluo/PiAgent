@@ -1,4 +1,5 @@
 from pathlib import Path
+from face import states
 from face.state import FaceState
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
