@@ -34,10 +34,38 @@ class SearchTool:
         Output:
         - A short text summary that can be passed into the LLM as context.
         """
+        # Lesson 8: Tools - Web Search
+        #
+        # Goal:
+        # Search the web and return a short piece of text that the LLM can use.
+        #
+        # Suggested package:
+        # - ddgs: provides the DDGS helper.
+        #
+        # Import after installing requirements:
+        #   from ddgs import DDGS
+        #
+        # Concept to learn:
+        # Search tools usually return lots of data. Your job is to shape that
+        # data into a small, useful context string.
+        #
+        # Small first step:
+        # Ask for one result with max_results=1.
+        #
+        # Real version idea:
+        # 1. Open DDGS with: with DDGS() as ddgs:
+        # 2. Call ddgs.text(query, region="us-en", max_results=1).
+        # 3. Pull out the title, href, and body/snippet.
+        # 4. Return a short string for the LLM.
+        #
+        # Expected return value:
+        # A short string like:
+        #   "Title: ...\nSummary: ...\nURL: ..."
+
         try:
-            with DDGS() as ddgs:
+            with DDGS() as engine:
                 results = list(
-                    ddgs.text(
+                    engine.text(
                         query,
                         region=self.region,
                         max_results=self.max_results,
@@ -55,3 +83,4 @@ class SearchTool:
         url = result.get("href", "")
 
         return f"Title: {title}\nSummary: {summary}\nURL: {url}"
+

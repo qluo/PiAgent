@@ -108,11 +108,16 @@
 
     .two {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 14px;
     }
 
+    .runtime-setup {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
     .card {
+      min-width: 0;
       padding: 16px;
       border: 1px solid var(--line);
       border-radius: 8px;
@@ -317,6 +322,28 @@
     </section>
 
     <section>
+      <h2>Learning Map</h2>
+      <p>Most lessons take about 25–40 minutes. Hardware lessons can take longer because every microphone, speaker, and display is a little different.</p>
+      <div class="grid">
+        <div class="card blue">
+          <h3>Words You Will Meet</h3>
+          <p><strong>STT</strong> means speech-to-text: turning spoken words into text. <strong>TTS</strong> means text-to-speech: turning text into sound. An <strong>LLM</strong> is a program that predicts useful text. An <strong>API</strong> is a simple way for programs to talk to each other.</p>
+        </div>
+        <div class="card green">
+          <h3>What Success Looks Like</h3>
+          <p>Every lesson ends with one visible result: a demo runs, a face changes, a test passes, or the agent speaks. If you do not see that result, pause and debug before moving on.</p>
+        </div>
+        <div class="card yellow">
+          <h3>Core Then Stretch</h3>
+          <p>Finish the listed steps first. The stretch ideas are optional experiments for students who want an extra challenge.</p>
+        </div>
+      </div>
+      <div class="callout">
+        <p><strong>Lesson outcomes:</strong> 1: see a fake conversation; 2: show a changing face; 3: wake by keyboard or voice; 4: run the agent loop; 5: turn speech into text; 6: hear speech from the speaker; 7: receive a local model answer; 8: use a checked search result; 9: run the complete assistant.</p>
+      </div>
+    </section>
+
+    <section>
       <h2>Before You Start</h2>
       <div class="two">
         <div class="card purple">
@@ -343,8 +370,69 @@ source .venv/bin/activate
 uv pip install -r requirements.txt
 
 curl -fsSL https://ollama.com/install.sh | sh
-ollama pull llama3.2:1b
+ollama pull gemma3:1b
 uv run python demos/lesson1_demo.py</code></pre>
+    </section>
+
+    <section>
+      <h2>Raspberry Pi Runtime Setup</h2>
+      <p>The Python lessons run with <code>uv</code>, but the full voice assistant also needs a few local programs, model files, and working audio/display hardware on the Raspberry Pi.</p>
+      <div class="two runtime-setup">
+        <div class="card blue">
+          <h3>Install System Tools</h3>
+          <p>Install build tools, audio tools, and display support before testing the full agent. <code>cmake</code> is required for <code>whisper.cpp</code>.</p>
+          <pre><code>sudo apt update
+sudo apt install -y git cmake build-essential pkg-config portaudio19-dev alsa-utils python3-dev python3-pip libsdl2-dev
+
+git --version
+cmake --version
+gcc --version
+
+arecord -l
+aplay -l
+speaker-test -t wav -c 2
+# Press Ctrl+C to stop speaker-test.</code></pre>
+        </div>
+        <div class="card green">
+          <h3>Local LLM</h3>
+          <p>The current agent code uses Ollama with <code>gemma3:1b</code> at <code>localhost:11434</code>.</p>
+          <pre><code>curl -fsSL https://ollama.com/install.sh | sh
+ollama pull gemma3:1b
+ollama run gemma3:1b</code></pre>
+        </div>
+      </div>
+      <div class="two runtime-setup">
+        <div class="card yellow">
+          <h3>Speech To Text</h3>
+          <p>The STT tool listens until speech ends, then sends a temporary WAV chunk to <code>whisper.cpp</code>.</p>
+          <pre><code>git clone https://github.com/ggml-org/whisper.cpp.git
+cmake -S whisper.cpp -B whisper.cpp/build
+cmake --build whisper.cpp/build -j 4
+
+mkdir -p models
+curl -L https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin -o models/ggml-base.en.bin</code></pre>
+        </div>
+        <div class="card pink">
+          <h3>Text To Speech</h3>
+          <p>The TTS tool streams Piper audio directly into <code>aplay</code>.</p>
+          <pre><code>uname -m
+mkdir -p tools
+cd tools
+curl -L https://github.com/rhasspy/piper/releases/latest/download/piper_linux_aarch64.tar.gz -o piper.tar.gz
+tar -xzf piper.tar.gz
+cd ..
+tools/piper/piper --help
+
+mkdir -p models/piper
+curl -L https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/low/en_US-lessac-low.onnx -o models/piper/en_US-lessac-low.onnx
+curl -L https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/lessac/low/en_US-lessac-low.onnx.json -o models/piper/en_US-lessac-low.onnx.json
+
+echo "Hello from Pi Agent" | tools/piper/piper --model models/piper/en_US-lessac-low.onnx --output-raw | aplay -r 22050 -f S16_LE -t raw -</code></pre>
+        </div>
+      </div>
+      <div class="callout">
+        <p>Default paths used by the code: <code>whisper.cpp/build/bin/whisper-cli</code>, <code>models/ggml-base.en.bin</code>, and <code>models/piper/en_US-lessac-low.onnx</code>. If you put files somewhere else, update the tool settings in <code>main.py</code>.</p>
+      </div>
     </section>
 
     <section>
@@ -356,8 +444,8 @@ uv run python demos/lesson1_demo.py</code></pre>
           <p>Start with this HTML guide to understand the goal and the big idea.</p>
         </div>
         <div class="card green">
-          <h3>Open The File</h3>
-          <p>Go to the file listed in the lesson, then read the TODO comments inside the function.</p>
+          <h3>Open In Your IDE</h3>
+          <p>Open the Python file listed in the lesson in your IDE, then read the TODO comments inside the function.</p>
         </div>
         <div class="card yellow">
           <h3>Build Small</h3>
@@ -484,16 +572,20 @@ uv run pytest tests/lesson_1</code></pre>
         <li>Open the local <code>faces/</code> folder and look at the picture folders: <code>idle</code>, <code>listening</code>, <code>thinking</code>, <code>speaking</code>, <code>error</code>, <code>capturing</code>, and <code>warmup</code>.</li>
         <li>Run the state test first:<pre><code>uv run pytest tests/lesson_2/test_01_face_state.py</code></pre></li>
         <li>Run the picture folder test:<pre><code>uv run pytest tests/lesson_2/test_02_face_assets.py</code></pre></li>
-        <li>Open <code>face/renderer.py</code>. Implement <code>load()</code> so it reads PNG files from each folder.</li>
-        <li>Read <code>FaceRenderer.__init__()</code>. Notice that <code>faces_dir</code>, <code>frames</code>, <code>frame_indexes</code>, and <code>last_drawn_state</code> are stored on <code>self</code>.</li>
+        <li>Open the Python file <code>face/renderer.py</code> in your IDE. Find the three student TODO functions: <code>load()</code>, <code>draw(state)</code>, and <code>_draw_with_pygame(frame)</code>.</li>
+        <li>Read <code>FaceRenderer.__init__()</code>. <code>faces_dir</code> tells the renderer where to find the state picture folders. Notice that it, <code>frames</code>, <code>frame_indexes</code>, <code>last_drawn_state</code>, <code>_pygame</code>, and <code>_screen</code> are stored on <code>self</code>.</li>
+        <li>Read the provided helper <code>_setup_display()</code>. It starts <code>pygame</code>, creates a fullscreen window, and stores the screen on <code>self</code>.</li>
+        <li>Implement <code>load()</code> so it reads PNG files from each folder.</li>
         <li>Store the loaded pictures in a dictionary where the key is the state name, such as <code>"thinking"</code>.</li>
         <li>Run the load test before drawing anything:<pre><code>uv run pytest tests/lesson_2/test_03_renderer_load.py</code></pre></li>
         <li>Implement <code>draw(state)</code> so it draws the next picture for the current state.</li>
+        <li>Implement <code>_draw_with_pygame(frame)</code>. It should put one loaded image frame on the screen and call <code>pygame.display.flip()</code>.</li>
         <li>Store <code>self.last_drawn_state = state</code> inside <code>draw()</code> so the test can check which state was drawn.</li>
         <li>Run the draw test:<pre><code>uv run pytest tests/lesson_2/test_04_renderer_draw.py</code></pre></li>
-        <li>Open <code>face/controller.py</code>. Implement <code>run_once()</code> so it reads <code>face_state.get()</code> and asks the renderer to draw that state one time.</li>
+        <li>Open the Python file <code>face/controller.py</code> in your IDE. Its constructor receives the shared <code>face_state</code> and an optional <code>renderer</code>; tests use a small fake renderer while the real program uses <code>FaceRenderer</code>. Implement <code>run_once()</code> so it reads <code>face_state.get()</code> and asks the renderer to draw that state one time.</li>
         <li>Run the controller step test:<pre><code>uv run pytest tests/lesson_2/test_05_controller_run_once.py</code></pre></li>
-        <li>Implement <code>run()</code> so it loads the renderer once, then repeatedly calls <code>run_once()</code> and sleeps briefly.</li>
+        <li>Implement <code>run(self, sleep_seconds: float = 0.1)</code> so it loads the renderer once, then repeatedly calls <code>run_once()</code> and sleeps for <code>sleep_seconds</code>.</li>
+        <li>Run the controller loop test:<pre><code>uv run pytest tests/lesson_2/test_06_controller_run.py</code></pre></li>
         <li>Find <code>Thread(target=face_controller.run, daemon=True).start()</code> in <code>main.py</code>.</li>
         <li>Discuss why the face controller needs a background thread: the picture face should not freeze while the agent waits for input.</li>
       </ol>
@@ -515,20 +607,36 @@ uv run pytest tests/lesson_1</code></pre>
     thinking_04.png</code></pre>
       <pre><code>renderer = FaceRenderer(faces_dir="faces")
 renderer.load()
-renderer.draw("thinking")</code></pre>
+renderer.draw("thinking")
+
+def _setup_display(self):
+    # Provided helper: starts pygame and creates self._screen
+    ...
+
+def _draw_with_pygame(self, frame):
+    # TODO for students:
+    # 1. Return early if pygame or screen is missing.
+    # 2. Read pygame events.
+    # 3. Convert frame to a pygame surface.
+    # 4. Scale, blit, and flip the display.
+    pass</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
         <li>You can explain what <code>FaceState.set()</code> does.</li>
         <li>You can explain why the face controller runs in a thread.</li>
         <li>You can explain how one face state maps to one picture folder.</li>
+        <li>You implemented <code>load()</code>, <code>draw(state)</code>, and <code>_draw_with_pygame(frame)</code>.</li>
         <li>The renderer can show at least one PNG picture from the <code>faces/</code> folder.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code>uv run python -m demos.lesson2_face_demo</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_2/test_01_face_state.py
 uv run pytest tests/lesson_2/test_02_face_assets.py
 uv run pytest tests/lesson_2/test_03_renderer_load.py
 uv run pytest tests/lesson_2/test_04_renderer_draw.py
 uv run pytest tests/lesson_2/test_05_controller_run_once.py
+uv run pytest tests/lesson_2/test_06_controller_run.py
 
 # Or run the whole lesson:
 uv run pytest tests/lesson_2</code></pre>
@@ -545,7 +653,7 @@ uv run pytest tests/lesson_2</code></pre>
             <li>Blocking functions: <code>wait()</code> pauses until the wake word is heard.</li>
             <li>Audio sample rate: wake word tools often expect 16 kHz audio.</li>
             <li>Tool swapping: the agent still calls <code>wake_word.wait()</code> no matter how the tool works inside.</li>
-            <li>Configuration: <code>__init__()</code> stores settings such as threshold and sample rate.</li>
+            <li>Configuration: <code>__init__()</code> stores settings such as model name, mode, threshold, and sample rate.</li>
           </ul>
         </div>
         <div class="card green">
@@ -566,22 +674,40 @@ uv run pytest tests/lesson_2</code></pre>
       <h3>Steps</h3>
       <ol>
         <li>Read <code>FakeWakeWordTool.wait()</code> in <code>demos/lesson1_demo.py</code>.</li>
-        <li>Open <code>agent/tools/wake_word.py</code>.</li>
-        <li>Read <code>WakeWordTool.__init__()</code>. Notice <code>model_path</code>, <code>threshold</code>, and <code>sample_rate</code>.</li>
+        <li>Open the Python file <code>agent/tools/wake_word.py</code> in your IDE.</li>
+        <li>Read <code>WakeWordTool.__init__()</code>. Notice <code>model_path</code>, <code>threshold</code>, <code>sample_rate</code>, and <code>mode</code>.</li>
         <li>Keep the same method name: <code>wait()</code>.</li>
-        <li>First implement a keyboard wake word: loop until the user types <code>wake</code>.</li>
-        <li>Then explore <code>openwakeword</code>: load a wake word model, read microphone audio, and check the prediction score.</li>
-        <li>Run the manual microphone demo:<pre><code>uv run python demos/test_wake_word_audio.py</code></pre></li>
+        <li>Use <code>mode="keyboard"</code> for tests and early classroom debugging.</li>
+        <li>Use <code>mode="microphone"</code> for the real Raspberry Pi wake word.</li>
+        <li>First implement <code>_wait_for_keyboard_wake()</code>: loop until the user types <code>wake</code>.</li>
+        <li>Then implement <code>_wait_for_microphone_wake()</code>: load the default <code>hey_jarvis</code> model, use the microphone callback to put 16 kHz mono audio chunks into a queue, and score each chunk in a simple loop.</li>
+        <li>Run the manual microphone demo:<pre><code>uv run python -m demos.lesson3_wake_word_demo</code></pre></li>
         <li>Return from <code>wait()</code> only when the wake word is detected.</li>
       </ol>
       <pre><code>class WakeWordTool:
-    def __init__(self, model_path=None, threshold=0.5, sample_rate=16000):
+    def __init__(self, model_path="hey_jarvis", threshold=0.5, sample_rate=16000, mode="microphone"):
         self.model_path = model_path
         self.threshold = threshold
         self.sample_rate = sample_rate
+        self.mode = mode
 
     def wait(self):
-        # TODO: listen until the wake word is detected
+        if self.mode == "keyboard":
+            return self._wait_for_keyboard_wake()
+        return self._wait_for_microphone_wake()
+
+    def _wait_for_keyboard_wake(self):
+        # TODO: loop until the user types "wake"
+        pass
+
+    def _wait_for_microphone_wake(self):
+        # 1. Load the openWakeWord Model.
+        # 2. Create audio_queue = Queue().
+        # 3. Make audio_callback(indata, _frames, _time, status). Inside it, add
+        #    one mono audio chunk with audio_queue.put(indata[:, 0].copy()).
+        # 4. Open sd.InputStream(..., callback=audio_callback).
+        # 5. In a loop, score each chunk with model.predict(audio_chunk).
+        # 6. Return when max(scores.values()) reaches self.threshold.
         pass</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
@@ -592,12 +718,13 @@ uv run pytest tests/lesson_2</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_3/test_01_wake_word_api.py
 uv run pytest tests/lesson_3/test_02_keyboard_wake_word.py
+uv run pytest tests/lesson_3/test_03_wake_word_mode.py
 
 # Or run the whole lesson:
 uv run pytest tests/lesson_3</code></pre>
       <h3>Manual Audio Demo</h3>
-      <pre><code>uv run python demos/test_wake_word_audio.py
-uv run python demos/test_wake_word_audio.py --threshold 0.3</code></pre>
+      <pre><code>uv run python -m demos.lesson3_wake_word_demo
+uv run python -m demos.lesson3_wake_word_demo --threshold 0.3</code></pre>
     </section>
 
     <section id="lesson-4" class="lesson">
@@ -625,32 +752,37 @@ uv run python demos/test_wake_word_audio.py --threshold 0.3</code></pre>
       </div>
       <h3>Steps</h3>
       <ol>
-        <li>Open <code>demos/lesson1_demo.py</code> and find <code>Agent.run()</code>.</li>
-        <li>Open <code>agent/agent.py</code> and find the skeleton <code>Agent.run()</code>.</li>
+        <li>Open the Python file <code>demos/lesson1_demo.py</code> in your IDE and find <code>Agent.run()</code>.</li>
+        <li>Open the Python file <code>agent/agent.py</code> in your IDE and find the skeleton <code>Agent.run()</code>.</li>
+        <li>Add <code>from face import states</code> at the top so the agent can use named face states.</li>
         <li>Copy the high-level loop idea, not every fake detail.</li>
         <li>Call <code>self.wake_word.wait()</code> when idle.</li>
         <li>Set the face to <code>listening</code>, then call <code>self.stt.listen_and_transcribe()</code>.</li>
         <li>Set the face to <code>thinking</code>, then call <code>self.respond(user_text)</code>.</li>
         <li>Set the face to <code>speaking</code>, then call <code>self.tts.speak(response)</code>.</li>
         <li>Set the face back to <code>idle</code>.</li>
+        <li>Find <code>Agent.respond(user_text)</code>. For now, implement the TODO by returning <code>self.llm.answer(user_text)</code>.</li>
+        <li>Later, Lesson 8 will update <code>respond()</code> so the LLM decides whether search is needed.</li>
       </ol>
-      <pre><code>self.face_state.set("listening")
-user_text = self.stt.listen_and_transcribe()
-
-self.face_state.set("thinking")
-response = self.respond(user_text)
-
-self.face_state.set("speaking")
-self.tts.speak(response)</code></pre>
+      <pre><code>try:
+    # Run the agent until the user presses Ctrl+C in the terminal.
+    agent.run()
+except KeyboardInterrupt:
+    # Put the face back to idle before the program exits.
+    face_state.set(states.IDLE)
+    print("\nPiAgent stopped.")</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
         <li><code>Agent.run()</code> has the full loop shape.</li>
         <li>The agent calls tools instead of doing tool work directly.</li>
         <li>Face states match the part of the loop currently running.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code>uv run python -m demos.lesson4_agent_loop_demo</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_4/test_01_agent_respond.py
 uv run pytest tests/lesson_4/test_02_agent_dependencies.py
+uv run pytest tests/lesson_4/test_03_agent_run.py
 
 # Or run the whole lesson:
 uv run pytest tests/lesson_4</code></pre>
@@ -664,10 +796,10 @@ uv run pytest tests/lesson_4</code></pre>
         <div class="card blue">
           <h3>Concepts To Explore</h3>
           <ul>
-            <li>Recording audio from a microphone.</li>
-            <li>Saving audio as a short WAV file.</li>
+            <li>Listening to live microphone chunks.</li>
+            <li>Voice activity detection: start when speech begins, stop after silence.</li>
             <li>Transcribing audio into text.</li>
-            <li>Recording settings: <code>__init__()</code> stores sample rate, duration, and output file path.</li>
+            <li>Recognition settings: <code>__init__()</code> stores sample rate, max speech length, silence length, and whisper.cpp paths.</li>
           </ul>
         </div>
         <div class="card green">
@@ -675,47 +807,46 @@ uv run pytest tests/lesson_4</code></pre>
           <ul>
             <li><code>agent/tools/stt.py</code></li>
             <li><code>SpeechToTextTool.listen_and_transcribe()</code></li>
+            <li><code>SpeechToTextTool.listen_until_silence()</code>: provided helper that records one spoken phrase.</li>
+            <li><code>SpeechToTextTool.loudness()</code>: provided helper that measures microphone volume.</li>
             <li><code>agent/agent.py</code>: where the agent calls STT.</li>
           </ul>
         </div>
       </div>
       <h3>Packages And Tools</h3>
       <ul>
-        <li>Recording option: <code>sounddevice</code> plus Python's built-in <code>wave</code> module.</li>
+        <li>Microphone option: <code>sounddevice</code> plus Python's built-in <code>wave</code> module for the temporary whisper.cpp input.</li>
         <li>Local transcription option: <code>whisper.cpp</code> with a small model such as <code>ggml-base.en.bin</code>.</li>
-        <li>Start simple: record a fixed 3-second clip before trying automatic silence detection.</li>
+        <li>Voice detection idea: listen in tiny chunks, keep chunks when speech starts, then stop after quiet.</li>
       </ul>
       <h3>Steps</h3>
       <ol>
-        <li>Open <code>agent/tools/stt.py</code>.</li>
-        <li>Read <code>SpeechToTextTool.__init__()</code>. Notice <code>sample_rate</code>, <code>seconds</code>, and <code>output_wav</code>.</li>
+        <li>Open the Python file <code>agent/tools/stt.py</code> in your IDE.</li>
+        <li>Read <code>SpeechToTextTool.__init__()</code>. Notice <code>sample_rate</code>, <code>seconds</code>, <code>silence_seconds</code>, <code>model_path</code>, and <code>whisper_binary</code>.</li>
         <li>Keep the method name <code>listen_and_transcribe()</code>.</li>
-        <li>Use <code>sounddevice</code> to record a short microphone clip.</li>
-        <li>Save the clip as <code>input.wav</code>.</li>
-        <li>Run a local transcription command, such as <code>whisper.cpp</code>.</li>
-        <li>Read the transcription result and return it as a string.</li>
+        <li>Read the provided <code>listen_until_silence()</code> helper. It uses <code>sounddevice</code> to listen in short chunks.</li>
+        <li>Read the provided <code>loudness()</code> helper. <code>listen_until_silence()</code> uses it to start when speech begins and stop after quiet.</li>
+        <li>Inside <code>listen_and_transcribe()</code>, call <code>self.listen_until_silence()</code> to capture the user's speech.</li>
+        <li>Save the captured speech to a temporary WAV file for <code>whisper.cpp</code>.</li>
+        <li>Send the temporary WAV file to <code>whisper.cpp</code>.</li>
+        <li>Return the transcription as a string.</li>
         <li>Print the transcription while debugging so you can see what the agent heard.</li>
       </ol>
-      <pre><code>def __init__(self, sample_rate=16000, seconds=3.0, output_wav="input.wav"):
-    self.sample_rate = sample_rate
-    self.seconds = seconds
-    self.output_wav = output_wav
-
-def listen_and_transcribe(self) -> str:
-    # TODO: record microphone audio
-    # TODO: save input.wav
-    # TODO: run local speech-to-text
-    # TODO: return the transcribed text
-    return ""</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
         <li>The microphone records sound.</li>
+        <li><code>listen_and_transcribe()</code> uses the provided helper <code>listen_until_silence()</code>.</li>
         <li>The STT tool returns text.</li>
         <li>The agent can answer a spoken question.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code># Start with keyboard mode, then use microphone mode after implementation:
+uv run python -m demos.lesson5_stt_demo
+uv run python -m demos.lesson5_stt_demo --mode microphone</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_5/test_01_stt_api.py
 uv run pytest tests/lesson_5/test_02_keyboard_stt.py
+uv run pytest tests/lesson_5/test_03_loudness.py
 
 # Or run the whole lesson:
 uv run pytest tests/lesson_5</code></pre>
@@ -729,10 +860,10 @@ uv run pytest tests/lesson_5</code></pre>
         <div class="card blue">
           <h3>Concepts To Explore</h3>
           <ul>
-            <li>Turning text into an audio file.</li>
-            <li>Playing audio through the Raspberry Pi speaker.</li>
+            <li>Turning text into speech audio.</li>
+            <li>Streaming speech directly through the Raspberry Pi speaker.</li>
             <li>Keeping speech code inside a tool.</li>
-            <li>Speech settings: <code>__init__()</code> stores the voice model path and output WAV path.</li>
+            <li>Speech settings: <code>__init__()</code> stores the voice model path, Piper binary, and player binary.</li>
           </ul>
         </div>
         <div class="card green">
@@ -748,25 +879,26 @@ uv run pytest tests/lesson_5</code></pre>
       <ul>
         <li>Local TTS option: Piper.</li>
         <li>Audio playback option: <code>aplay</code> on Raspberry Pi OS.</li>
-        <li>Fallback option for early testing: keep printing <code>Agent: ...</code>.</li>
+        <li>No output WAV is needed: Piper can stream raw audio directly to <code>aplay</code>.</li>
       </ul>
       <h3>Steps</h3>
       <ol>
-        <li>Open <code>agent/tools/tts.py</code>.</li>
-        <li>Read <code>TextToSpeechTool.__init__()</code>. Notice <code>voice_model_path</code> and <code>output_wav</code>.</li>
+        <li>Open the Python file <code>agent/tools/tts.py</code> in your IDE.</li>
+        <li>Read <code>TextToSpeechTool.__init__()</code>. Notice <code>voice_model_path</code>, <code>piper_binary</code>, and <code>player_binary</code>.</li>
         <li>Keep the method name <code>speak(text)</code>.</li>
         <li>Install or prepare a local TTS engine such as Piper.</li>
-        <li>Generate a WAV file from a short sentence.</li>
-        <li>Play the WAV file through the speaker.</li>
+        <li>Send text into Piper.</li>
+        <li>Stream Piper's raw audio into <code>aplay</code>.</li>
         <li>Call <code>tts.speak(response)</code> from the agent only after the face switches to <code>speaking</code>.</li>
       </ol>
-      <pre><code>def __init__(self, voice_model_path=None, output_wav="output.wav"):
+      <pre><code>def __init__(self, voice_model_path, piper_binary="tools/piper/piper", player_binary="aplay"):
     self.voice_model_path = voice_model_path
-    self.output_wav = output_wav
+    self.piper_binary = piper_binary
+    self.player_binary = player_binary
 
 def speak(self, text: str):
-    # TODO: turn text into audio
-    # TODO: play the audio
+    # TODO: send text to Piper
+    # TODO: stream audio to aplay
     pass</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
@@ -774,6 +906,8 @@ def speak(self, text: str):
         <li>The agent can speak one sentence out loud.</li>
         <li>The face shows <code>speaking</code> while the answer is playing.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code>uv run python -m demos.lesson6_tts_demo</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_6/test_01_tts_api.py
 uv run pytest tests/lesson_6/test_02_tts_speak.py
@@ -808,22 +942,22 @@ uv run pytest tests/lesson_6</code></pre>
       <h3>Packages And Tools</h3>
       <ul>
         <li>Runtime: Ollama.</li>
-        <li>Small model to start: <code>llama3.2:1b</code>.</li>
+        <li>Small model to start: <code>gemma3:1b</code>.</li>
         <li>Python HTTP option: <code>requests</code>, or Python's built-in <code>urllib.request</code>.</li>
         <li>Local endpoint: <code>http://localhost:11434</code>.</li>
       </ul>
       <h3>Steps</h3>
       <ol>
         <li>Install Ollama on the Raspberry Pi or development computer.</li>
-        <li>Pull the model: <code>ollama pull llama3.2:1b</code>.</li>
-        <li>Test it in the terminal: <code>ollama run llama3.2:1b</code>.</li>
-        <li>Open <code>agent/tools/llm.py</code>.</li>
+        <li>Pull the model: <code>ollama pull gemma3:1b</code>.</li>
+        <li>Test it in the terminal: <code>ollama run gemma3:1b</code>.</li>
+        <li>Open the Python file <code>agent/tools/llm.py</code> in your IDE.</li>
         <li>Implement <code>answer(user_text)</code> so it sends the user text to Ollama.</li>
         <li>Return only the model's answer string.</li>
         <li>Implement <code>answer_with_context(user_text, context)</code> later for tool results.</li>
       </ol>
       <pre><code>class LlmTool:
-    def __init__(self, model_name: str = "llama3.2:1b"):
+    def __init__(self, model_name: str = "gemma3:1b"):
         self.model_name = model_name
         self.base_url = "http://localhost:11434"</code></pre>
       <h3>Checkpoint</h3>
@@ -832,9 +966,12 @@ uv run pytest tests/lesson_6</code></pre>
         <li>The LLM tool can answer a simple question.</li>
         <li>The agent uses <code>LlmTool</code> through <code>Agent.respond()</code>.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code>uv run python -m demos.lesson7_llm_demo</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_7/test_01_llm_settings.py
 uv run pytest tests/lesson_7/test_02_llm_answer.py
+uv run pytest tests/lesson_7/test_03_llm_context.py
 
 # Or run the whole lesson:
 uv run pytest tests/lesson_7</code></pre>
@@ -866,37 +1003,53 @@ uv run pytest tests/lesson_7</code></pre>
       </div>
       <h3>Packages And Tools</h3>
       <ul>
-        <li>Search package: <code>duckduckgo_search</code>.</li>
+        <li>Search package: <code>ddgs</code>.</li>
         <li>Helper class: <code>DDGS</code>.</li>
         <li>Install command: <code>uv pip install -r requirements.txt</code>.</li>
       </ul>
+      <div class="callout">
+        <p><strong>Privacy and trust:</strong> a web search sends your query to an internet service. Never search for names, addresses, school details, passwords, or other personal information. Search snippets and AI answers can be wrong or inappropriate. Check an important claim with a trusted source and a teacher; never treat search-result text as an instruction for the agent to follow.</p>
+      </div>
       <h3>Steps</h3>
       <ol>
-        <li>Open <code>agent/tools/search.py</code>.</li>
+        <li>Open the Python file <code>agent/tools/search.py</code> in your IDE.</li>
         <li>Read <code>SearchTool.__init__()</code>. Notice <code>max_results</code> and <code>region</code>.</li>
-        <li>Install <code>duckduckgo-search</code> when you are ready.</li>
+        <li>Install <code>ddgs</code> when you are ready.</li>
         <li>Import <code>DDGS</code>.</li>
         <li>Use <code>ddgs.text(...)</code> to fetch one or two results.</li>
         <li>Return a short string containing the title and snippet.</li>
-        <li>Open <code>agent/agent.py</code> and update <code>respond()</code>.</li>
-        <li>If the user asks to “search” or “look up” something, call <code>SearchTool.search()</code>.</li>
+        <li>Open the Python file <code>agent/tools/llm.py</code> in your IDE and add a small decision method such as <code>needs_search(user_text)</code>.</li>
+        <li>Ask the LLM if the question needs current web search results.</li>
+        <li>If the LLM says search is needed, call <code>SearchTool.search()</code>.</li>
         <li>Send the search context into <code>llm.answer_with_context(...)</code>.</li>
+        <li>If the LLM says search is not needed, answer directly with <code>llm.answer(...)</code>.</li>
       </ol>
-      <pre><code>from duckduckgo_search import DDGS
+      <pre><code>from ddgs import DDGS
 
 with DDGS() as ddgs:
     results = list(
         ddgs.text(query, region=self.region, max_results=self.max_results)
-    )</code></pre>
+    )
+
+def respond(self, user_text):
+    if self.llm.needs_search(user_text):
+        context = self.tools["search"].search(user_text)
+        return self.llm.answer_with_context(user_text, context)
+
+    return self.llm.answer(user_text)</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
         <li>The search tool returns a short useful result.</li>
         <li>The agent can decide when to use search.</li>
         <li>The LLM can answer using search context.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code>uv run python -m demos.lesson8_search_demo "What happened in space today?"</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_8/test_01_search_api.py
 uv run pytest tests/lesson_8/test_02_search_returns_text.py
+uv run pytest tests/lesson_8/test_03_agent_search_routing.py
+uv run pytest tests/lesson_8/test_04_llm_needs_search.py
 
 # Or run the whole lesson:
 uv run pytest tests/lesson_8</code></pre>
@@ -929,21 +1082,22 @@ uv run pytest tests/lesson_8</code></pre>
       <h3>Packages And Tools</h3>
       <ul>
         <li>Face rendering option: <code>pygame</code> for a fullscreen Pi display.</li>
+        <li>Wake word option: <code>openwakeword</code> with the default <code>hey_jarvis</code> model.</li>
+        <li>Speech-to-text option: <code>whisper.cpp</code> with <code>models/ggml-base.en.bin</code>.</li>
+        <li>Text-to-speech option: Piper with <code>models/piper/en_US-lessac-low.onnx</code>.</li>
+        <li>Local LLM option: Ollama with <code>gemma3:1b</code>.</li>
         <li>Face asset option: PNG images inside <code>faces/idle</code>, <code>faces/listening</code>, <code>faces/thinking</code>, and <code>faces/speaking</code>.</li>
         <li>System check tools: terminal logs and small <code>print()</code> messages.</li>
       </ul>
       <h3>Steps</h3>
       <ol>
-        <li>Run each tool by itself before running the whole agent.</li>
-        <li>Open <code>main.py</code> and check that every tool is created there.</li>
-        <li>Implement <code>FaceController.run()</code> so it reads <code>face_state.get()</code>.</li>
-        <li>Implement <code>FaceRenderer.load()</code> to load image assets from the <code>faces/</code> folders.</li>
-        <li>Implement <code>FaceRenderer.draw(state)</code> to draw the next frame for the current state.</li>
-        <li>Run <code>python3 main.py</code>.</li>
+        <li>Confirm the runtime setup is complete: microphone, speaker, display, Ollama, whisper.cpp, Piper, and models.</li>
+        <li>Confirm Ollama is running and <code>ollama run gemma3:1b</code> works.</li>
+        <li>Run <code>uv run python main.py</code>.</li>
         <li>Test the full path: wake, speak question, transcribe, think, answer, return to idle.</li>
         <li>If something breaks, test the tool from that lesson again by itself.</li>
       </ol>
-      <pre><code>python3 main.py</code></pre>
+      <pre><code>uv run python main.py</code></pre>
       <h3>Checkpoint</h3>
       <ul class="checklist">
         <li>The face changes when the agent changes state.</li>
@@ -954,6 +1108,7 @@ uv run pytest tests/lesson_8</code></pre>
       </ul>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_9/test_01_project_wiring.py
+uv run pytest tests/lesson_9/test_02_main_wiring.py
 
 # Run all tests when everything is complete:
 uv run pytest tests</code></pre>
@@ -975,6 +1130,25 @@ uv run pytest tests</code></pre>
           <p>If the full agent is confusing, test only one tool at a time, then reconnect it to <code>Agent.run()</code>.</p>
         </div>
       </div>
+      <h3>Try One Check First</h3>
+      <ul>
+        <li>No microphone? Run <code>arecord -l</code>, then reconnect it or choose it with <code>--device</code> in the wake-word demo.</li>
+        <li>No speaker sound? Run <code>speaker-test -t wav -c 2</code> at low volume and press Ctrl+C to stop it.</li>
+        <li>Ollama connection error? Run <code>ollama run gemma3:1b</code>.</li>
+        <li>Missing Whisper or Piper file? Run <code>ls whisper.cpp/build/bin/whisper-cli models/ggml-base.en.bin tools/piper/piper</code>.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Optional Stretch Ideas</h2>
+      <p>Try these only after the matching lesson works.</p>
+      <ul>
+        <li>Lessons 1–2: create one new face image or face state.</li>
+        <li>Lessons 3–4: add a friendly message when the agent wakes up.</li>
+        <li>Lessons 5–6: tune the silence setting or make the agent speak a shorter answer.</li>
+        <li>Lessons 7–8: compare an answer with and without checked search context.</li>
+        <li>Lesson 9: draw a diagram that explains the complete agent loop to another student.</li>
+      </ul>
     </section>
 
     <footer>
