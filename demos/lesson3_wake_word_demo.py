@@ -1,10 +1,10 @@
-"""Manual wake word audio demo for Lesson 3.
+"""Manual wake-word audio demo for Lesson 3.
 
 Run this on the Raspberry Pi after implementing WakeWordTool:
 
-    uv run python demos/test_wake_word_audio.py
+    uv run python -m demos.lesson3_wake_word_demo
 
-This is not a unit test. It calls the student's microphone wake word code in
+This is not a unit test. It calls the student's microphone wake-word code in
 agent/tools/wake_word.py.
 """
 

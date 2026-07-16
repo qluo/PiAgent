@@ -20,7 +20,7 @@ Lesson 1 is already working. Later lessons contain TODOs for you to implement.
 
 ## Project Map
 
-- `demos/`: working demo code for the first lesson.
+- `demos/`: checkpoint demos for Lessons 1 through 8.
 - `face/`: face state, renderer, and display controller.
 - `faces/`: PNG face images for each agent state.
 - `agent/`: main agent loop.

@@ -628,6 +628,8 @@ def _draw_with_pygame(self, frame):
         <li>You implemented <code>load()</code>, <code>draw(state)</code>, and <code>_draw_with_pygame(frame)</code>.</li>
         <li>The renderer can show at least one PNG picture from the <code>faces/</code> folder.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code>uv run python -m demos.lesson2_face_demo</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_2/test_01_face_state.py
 uv run pytest tests/lesson_2/test_02_face_assets.py
@@ -679,7 +681,7 @@ uv run pytest tests/lesson_2</code></pre>
         <li>Use <code>mode="microphone"</code> for the real Raspberry Pi wake word.</li>
         <li>First implement <code>_wait_for_keyboard_wake()</code>: loop until the user types <code>wake</code>.</li>
         <li>Then implement <code>_wait_for_microphone_wake()</code>: load the default <code>hey_jarvis</code> model, use the microphone callback to put 16 kHz mono audio chunks into a queue, and score each chunk in a simple loop.</li>
-        <li>Run the manual microphone demo:<pre><code>uv run python -m demos.test_wake_word_audio</code></pre></li>
+        <li>Run the manual microphone demo:<pre><code>uv run python -m demos.lesson3_wake_word_demo</code></pre></li>
         <li>Return from <code>wait()</code> only when the wake word is detected.</li>
       </ol>
       <pre><code>class WakeWordTool:
@@ -721,8 +723,8 @@ uv run pytest tests/lesson_3/test_03_wake_word_mode.py
 # Or run the whole lesson:
 uv run pytest tests/lesson_3</code></pre>
       <h3>Manual Audio Demo</h3>
-      <pre><code>uv run python -m demos.test_wake_word_audio
-uv run python -m demos.test_wake_word_audio --threshold 0.3</code></pre>
+      <pre><code>uv run python -m demos.lesson3_wake_word_demo
+uv run python -m demos.lesson3_wake_word_demo --threshold 0.3</code></pre>
     </section>
 
     <section id="lesson-4" class="lesson">
@@ -775,6 +777,8 @@ except KeyboardInterrupt:
         <li>The agent calls tools instead of doing tool work directly.</li>
         <li>Face states match the part of the loop currently running.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code>uv run python -m demos.lesson4_agent_loop_demo</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_4/test_01_agent_respond.py
 uv run pytest tests/lesson_4/test_02_agent_dependencies.py
@@ -835,6 +839,10 @@ uv run pytest tests/lesson_4</code></pre>
         <li>The STT tool returns text.</li>
         <li>The agent can answer a spoken question.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code># Start with keyboard mode, then use microphone mode after implementation:
+uv run python -m demos.lesson5_stt_demo
+uv run python -m demos.lesson5_stt_demo --mode microphone</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_5/test_01_stt_api.py
 uv run pytest tests/lesson_5/test_02_keyboard_stt.py
@@ -898,6 +906,8 @@ def speak(self, text: str):
         <li>The agent can speak one sentence out loud.</li>
         <li>The face shows <code>speaking</code> while the answer is playing.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code>uv run python -m demos.lesson6_tts_demo</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_6/test_01_tts_api.py
 uv run pytest tests/lesson_6/test_02_tts_speak.py
@@ -956,6 +966,8 @@ uv run pytest tests/lesson_6</code></pre>
         <li>The LLM tool can answer a simple question.</li>
         <li>The agent uses <code>LlmTool</code> through <code>Agent.respond()</code>.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code>uv run python -m demos.lesson7_llm_demo</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_7/test_01_llm_settings.py
 uv run pytest tests/lesson_7/test_02_llm_answer.py
@@ -1031,6 +1043,8 @@ def respond(self, user_text):
         <li>The agent can decide when to use search.</li>
         <li>The LLM can answer using search context.</li>
       </ul>
+      <h3>Demo</h3>
+      <pre><code>uv run python -m demos.lesson8_search_demo "What happened in space today?"</code></pre>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_8/test_01_search_api.py
 uv run pytest tests/lesson_8/test_02_search_returns_text.py
