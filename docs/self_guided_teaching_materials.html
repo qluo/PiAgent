@@ -837,6 +837,9 @@ uv run pytest tests/lesson_2/test_04_renderer_draw.py
 uv run pytest tests/lesson_2/test_05_controller_run_once.py
 uv run pytest tests/lesson_2/test_06_controller_run.py
 
+# This checks the provided pygame display helper:
+uv run pytest tests/lesson_2/test_07_renderer_pygame.py
+
 # Or run the whole lesson:
 uv run pytest tests/lesson_2</code></pre>
     </section>
@@ -1217,7 +1220,9 @@ uv run pytest tests/lesson_8</code></pre>
         <li>Implement <code>build_prompt(user_text)</code> so empty instructions leave the request unchanged, while non-empty instructions and the user request appear in clearly labeled sections.</li>
         <li>Update <code>respond()</code> to give the built prompt to the LLM while keeping the original text for a search query.</li>
         <li>Run the prompt tests, then explain why local instructions apply to every conversation:<pre><code>uv run pytest tests/lesson_9/test_01_agents_md.py
-uv run pytest tests/lesson_9/test_02_build_prompt.py</code></pre></li>
+uv run pytest tests/lesson_9/test_02_build_prompt.py
+# This compatibility test lives in the Lesson 4 test folder:
+uv run pytest tests/lesson_4/test_03_agents_md.py</code></pre></li>
       </ol>
       <h3>Checkpoint</h3>
       <ul class="checklist">
@@ -1228,6 +1233,8 @@ uv run pytest tests/lesson_9/test_02_build_prompt.py</code></pre></li>
       <h3>Test</h3>
       <pre><code>uv run pytest tests/lesson_9/test_01_agents_md.py
 uv run pytest tests/lesson_9/test_02_build_prompt.py
+# This compatibility test lives in the Lesson 4 test folder:
+uv run pytest tests/lesson_4/test_03_agents_md.py
 
 # Or run the whole lesson:
 uv run pytest tests/lesson_9</code></pre>
