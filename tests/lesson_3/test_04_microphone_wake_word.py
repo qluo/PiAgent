@@ -1,6 +1,4 @@
-import sys
-from types import ModuleType
-
+import agent.tools.wake_word as wake_word_module
 from agent.tools.wake_word import WakeWordTool
 
 
@@ -38,15 +36,12 @@ class FakeModel:
 
 
 def test_microphone_wake_word_returns_when_model_reaches_threshold(monkeypatch):
-    sounddevice = ModuleType("sounddevice")
-    sounddevice.InputStream = FakeInputStream
-    model_module = ModuleType("openwakeword.model")
-    model_module.Model = FakeModel
-    openwakeword = ModuleType("openwakeword")
-    openwakeword.model = model_module
-    monkeypatch.setitem(sys.modules, "sounddevice", sounddevice)
-    monkeypatch.setitem(sys.modules, "openwakeword", openwakeword)
-    monkeypatch.setitem(sys.modules, "openwakeword.model", model_module)
+    monkeypatch.setattr(
+        wake_word_module,
+        "sd",
+        type("SoundDevice", (), {"InputStream": FakeInputStream}),
+    )
+    monkeypatch.setattr(wake_word_module, "Model", FakeModel)
 
     tool = WakeWordTool(model_path="lesson-model", threshold=0.6)
 

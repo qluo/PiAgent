@@ -61,17 +61,6 @@ class Agent:
         # The Agent is the orchestrator. It decides the order of actions,
         # but each tool does its own special job.
         #
-        # Small first step:
-        # Copy the high-level shape from demos/lesson1_demo.py:
-        # 1. Set face to "idle".
-        # 2. Wait for wake word: self.wake_word.wait().
-        # 3. Set face to "listening".
-        # 4. Get user text: self.stt.listen_and_transcribe().
-        # 5. Set face to "thinking".
-        # 6. Get response: self.respond(user_text).
-        # 7. Set face to "speaking".
-        # 8. Speak response: self.tts.speak(response).
-        #
         # Test idea:
         # Use fake tools first. If the loop works with fake tools, then swap
         # in one real tool at a time.
@@ -102,9 +91,6 @@ class Agent:
         # Goal:
         # Decide whether the agent should answer directly with the LLM or use
         # a tool first.
-        #
-        # Small first step:
-        # Return self.llm.answer(user_text).
         #
         # Later:
         # TODO for Lesson 8:
@@ -151,10 +137,6 @@ class Agent:
         # Keep Pi Agent's default behavior in AGENTS.md instead of repeating
         # it in every user request.
         #
-        # Small first step:
-        # If self.agents_md is empty, return user_text unchanged.
-        # Otherwise, return a clear prompt containing both the instructions and
-        # the user request.
         if not self.agents_md.strip():
             return user_text
         return (
@@ -176,10 +158,6 @@ class Agent:
         # Goal:
         # Read PROJECT_ROOT / "AGENTS.md" once when an Agent is created.
         #
-        # Small first step:
-        # 1. Build the path with PROJECT_ROOT / "AGENTS.md".
-        # 2. Return "" when it is not a file.
-        # 3. Otherwise return its UTF-8 text.
         agents_file = PROJECT_ROOT / "AGENTS.md"
         if not agents_file.is_file():
             return ""

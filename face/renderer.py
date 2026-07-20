@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from PIL import Image
+import pygame
 
 
 class FaceRenderer:
@@ -50,47 +51,9 @@ class FaceRenderer:
         # Each folder name is a face state. Each PNG inside that folder is one
         # animation frame for that state.
         #
-        # Small first step:
-        # Build a dictionary like:
-        #   self.frames["thinking"] = [image1, image2, image3]
-        #
         # Expected result:
         # After load() runs, draw("thinking") can find thinking frames.
 
-        faces_path = Path(self.faces_dir)
-        self.frames = {}
-        self.frame_indexes = {}
-
-        for state_dir in sorted(path for path in faces_path.iterdir() if path.is_dir()):
-            frames = [
-                Image.open(png_path).convert("RGBA")
-                for png_path in sorted(state_dir.glob("*.png"))
-            ]
-            if frames:
-                self.frames[state_dir.name] = frames
-                self.frame_indexes[state_dir.name] = 0
-
-        self._setup_display()
-        return self.frames
-
-    def _setup_display(self) -> None:
-        """Prepare pygame for drawing face images.
-
-        This helper is separated for students: Lesson 2 can first load images,
-        then fill in the display setup, then fill in drawing.
-        """
-        try:
-            import pygame
-
-            pygame.init()
-            self._pygame = pygame
-            if self._screen is None:
-                self._screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-        except Exception:
-            # Tests and laptops may not have a real display. Keep loaded frames
-            # usable so students can still test the code before moving to the Pi.
-            self._pygame = None
-            self._screen = None
 
     def draw(self, state: str) -> None:
         """Draw the next frame for a face state.
@@ -117,9 +80,6 @@ class FaceRenderer:
         # Animation is just showing images in order:
         # frame 1, frame 2, frame 3, then back to frame 1.
         #
-        # Small first step:
-        # Draw the first image for the state without animation.
-        #
         # Real version idea:
         # 1. If the display is not ready yet, call self._setup_display().
         # 2. Look up the frame list for state.
@@ -131,20 +91,6 @@ class FaceRenderer:
         #
         # Expected return value:
         # Nothing. The result appears on the display.
-        if not self.frames:
-            self.load()
-
-        frames = self.frames.get(state)
-        if not frames:
-            raise ValueError(f"No face frames loaded for state: {state}")
-
-        frame_index = self.frame_indexes.get(state, 0)
-        frame = frames[frame_index]
-        self.frame_indexes[state] = (frame_index + 1) % len(frames)
-        self.last_drawn_state = state
-
-        if self._screen is not None and self._pygame is not None:
-            self._draw_with_pygame(frame)
 
 
     def _draw_with_pygame(self, frame: object) -> None:
@@ -179,3 +125,20 @@ class FaceRenderer:
         screen.fill((0, 0, 0))
         screen.blit(surface, (x, y))
         pygame.display.flip()
+
+    def _setup_display(self) -> None:
+        """Prepare pygame for drawing face images.
+
+        This helper is separated for students: Lesson 2 can first load images,
+        then fill in the display setup, then fill in drawing.
+        """
+        try:
+            pygame.init()
+            self._pygame = pygame
+            if self._screen is None:
+                self._screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+        except Exception:
+            # Tests and laptops may not have a real display. Keep loaded frames
+            # usable so students can still test the code before moving to the Pi.
+            self._pygame = None
+            self._screen = None

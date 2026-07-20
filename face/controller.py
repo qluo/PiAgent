@@ -36,10 +36,6 @@ class FaceController:
         # Make one small controller step easy to test before writing the
         # forever loop in run().
         #
-        # Small first step:
-        # 1. Read the current state with self.face_state.get().
-        # 2. Call self.renderer.draw(state).
-        #
         # Expected return value:
         # Nothing. This method draws exactly one frame.
         if self.renderer is None:
@@ -71,9 +67,6 @@ class FaceController:
         #
         # Suggested package:
         # - time.sleep: pause between frames.
-        #
-        # Small first step:
-        # Print the current state whenever it changes.
         #
         # Real version idea:
         # 1. Call self.renderer.load() once before the loop.

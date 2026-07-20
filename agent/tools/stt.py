@@ -1,7 +1,10 @@
+import queue
 import subprocess
 import tempfile
 import wave
 from pathlib import Path
+
+import sounddevice as sd
 
 
 class SpeechToTextTool:
@@ -56,10 +59,6 @@ class SpeechToTextTool:
         # - numpy<2: stores recorded audio arrays.
         # - wave: built-in Python module for saving WAV files.
         # - whisper.cpp: local speech-to-text program for transcription.
-        #
-        # Small first step:
-        # If self.mode is "keyboard", return input("You: ") so the rest of the
-        # agent can be tested before the microphone works.
         #
         # Real version idea:
         # 1. Call self.listen_until_silence() to capture one spoken question.
@@ -119,10 +118,6 @@ class SpeechToTextTool:
 
     def listen_until_silence(self) -> bytes:
         """Record when speech starts, then stop after a short silence."""
-        import queue
-
-        import sounddevice as sd
-
         chunk_seconds = 0.1
         chunk_size = int(self.sample_rate * chunk_seconds)
         quiet_chunks_needed = int(self.silence_seconds / chunk_seconds)
@@ -175,4 +170,3 @@ class SpeechToTextTool:
         if sample_count == 0:
             return 0.0
         return total / sample_count
-

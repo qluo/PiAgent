@@ -1,9 +1,8 @@
 import subprocess
-import sys
 import wave
 from pathlib import Path
-from types import ModuleType
 
+import agent.tools.stt as stt_module
 from agent.tools.stt import SpeechToTextTool
 
 
@@ -55,9 +54,11 @@ class FakeRawInputStream:
 
 
 def test_listen_until_silence_keeps_speech_and_following_quiet_audio(monkeypatch):
-    sounddevice = ModuleType("sounddevice")
-    sounddevice.RawInputStream = FakeRawInputStream
-    monkeypatch.setitem(sys.modules, "sounddevice", sounddevice)
+    monkeypatch.setattr(
+        stt_module,
+        "sd",
+        type("SoundDevice", (), {"RawInputStream": FakeRawInputStream}),
+    )
     tool = SpeechToTextTool(seconds=1, silence_seconds=0.1, silence_threshold=500)
 
     assert tool.listen_until_silence() == b"\xe8\x03\x00\x00"

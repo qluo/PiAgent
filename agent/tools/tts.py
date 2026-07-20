@@ -43,11 +43,6 @@ class TextToSpeechTool:
         # - Piper: local text-to-speech that can run on Raspberry Pi.
         # - aplay: simple WAV playback command on Raspberry Pi OS.
         #
-        # Small first step:
-        # Print the text first:
-        #   print(f"Agent: {text}")
-        # Then replace the print with real speech after the loop works.
-        #
         # Real version idea:
         # 1. Send text into Piper.
         # 2. Ask Piper for raw audio with --output-raw.
@@ -104,4 +99,3 @@ class TextToSpeechTool:
 
         piper.wait()
         player.wait()
-

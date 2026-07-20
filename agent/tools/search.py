@@ -49,9 +49,6 @@ class SearchTool:
         # Search tools usually return lots of data. Your job is to shape that
         # data into a small, useful context string.
         #
-        # Small first step:
-        # Ask for one result with max_results=1.
-        #
         # Real version idea:
         # 1. Open DDGS with: with DDGS() as ddgs:
         # 2. Call ddgs.text(query, region="us-en", max_results=1).
@@ -83,4 +80,3 @@ class SearchTool:
         url = result.get("href", "")
 
         return f"Title: {title}\nSummary: {summary}\nURL: {url}"
-

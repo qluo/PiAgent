@@ -3,6 +3,8 @@ CHUNK_SIZE = 1280
 
 from queue import Queue
 
+import sounddevice as sd
+from openwakeword.model import Model
 
 
 class WakeWordTool:
@@ -51,10 +53,6 @@ class WakeWordTool:
         # - sounddevice: records microphone audio in Python.
         # - numpy<2: audio arrays used by openwakeword.
         #
-        # Small first step:
-        # Do a keyboard version before real audio:
-        # keep asking for input until the user types "wake".
-        #
         # Real version idea:
         # 1. Open the microphone with sounddevice.
         # 2. Feed short chunks of audio into openwakeword.
@@ -97,14 +95,6 @@ class WakeWordTool:
         # 5. In a loop, score each chunk with model.predict(audio_chunk).
         # 6. Return when max(scores.values()) reaches self.threshold.
         
-        try:
-            import sounddevice as sd
-            from openwakeword.model import Model
-        except ImportError as error:
-            raise RuntimeError(
-                "Missing wake word audio packages. Run: uv pip install -r requirements.txt"
-            ) from error
-
         if self.model_path:
             model = Model(wakeword_models=[self.model_path])
         else:

@@ -61,10 +61,6 @@ class LlmTool:
         # Ollama runs a local web server at self.base_url. Your Python code
         # sends a prompt to that server and receives generated text back.
         #
-        # Small first step:
-        # Test Ollama in the terminal first:
-        #   ollama run gemma3:1b
-        #
         # Real version idea:
         # 1. Send a POST request to an Ollama endpoint.
         # 2. Include self.model_name and user_text in the request body.
@@ -116,10 +112,6 @@ class LlmTool:
         # Concept to learn:
         # The LLM does not automatically know what your search tool found.
         # You must include the search result inside the prompt.
-        #
-        # Small first step:
-        # Build one combined prompt string:
-        #   "User question: ... Search result: ..."
         #
         # Real version idea:
         # 1. Combine user_text and context into a clear prompt.
