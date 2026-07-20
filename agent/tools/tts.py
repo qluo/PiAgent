@@ -41,13 +41,15 @@ class TextToSpeechTool:
         # - aplay: simple WAV playback command on Raspberry Pi OS.
         #
         # Implementation guide:
-        # 1. Start Piper with the selected voice model, --output-raw, and pipes
-        #    for its standard input and output.
-        # 2. Start aplay with the selected sample rate and raw 16-bit mono
-        #    audio settings. Give it Piper's stdout as its input.
-        # 3. Encode text as UTF-8, write it to Piper's stdin, then close stdin
-        #    to tell Piper there is no more text.
-        # 4. Wait for both processes so the next agent turn does not start
-        #    speaking before the current response has finished.
+        # 1. Use subprocess.Popen() to start self.piper_binary with --model,
+        #    self.voice_model_path, and --output-raw. Set stdin and stdout to
+        #    subprocess.PIPE so Python can send text and receive raw audio.
+        # 2. Start self.player_binary with -r self.sample_rate, -f S16_LE,
+        #    -t raw, and -. Pass Piper's stdout as the player's stdin, so Piper
+        #    streams its raw 16-bit mono audio directly to aplay.
+        # 3. Encode text as UTF-8, write the bytes to Piper's stdin, then close
+        #    that stdin to tell Piper that the complete sentence was sent.
+        # 4. Wait for Piper and then the player. This prevents the next agent
+        #    turn from starting while the current answer is still speaking.
         
         return
