@@ -61,3 +61,18 @@ def test_agent_uses_search_context_when_the_llm_requests_it():
     assert "What happened today?" in llm.search_decisions[0]
     assert "What happened today?" in prompt
     assert context == "search context"
+
+
+def test_agent_uses_prompt_for_the_llm_but_raw_text_for_search():
+    llm = RoutingLlm(should_search=True)
+    search = RecordingSearchTool()
+    agent = make_agent(llm, search)
+    agent.agents_md = "Use short answers."
+
+    agent.respond("What happened today?")
+
+    assert llm.search_decisions == [
+        "Agent instructions:\nUse short answers.\n\nUser request:\nWhat happened today?"
+    ]
+    assert search.queries == ["What happened today?"]
+    assert llm.context_answers[0][0] == llm.search_decisions[0]

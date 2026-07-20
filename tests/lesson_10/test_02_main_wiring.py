@@ -24,8 +24,11 @@ class FakeAgent:
 
 
 class FakeFaceController:
+    created = None
+
     def __init__(self, face_state):
         self.face_state = face_state
+        self.__class__.created = self
 
     def run(self):
         return None
@@ -35,6 +38,7 @@ def test_main_starts_the_face_thread_and_wires_the_agent(monkeypatch):
     FakeThread.started = []
     FakeAgent.created_with = None
     FakeAgent.ran = False
+    FakeFaceController.created = None
     monkeypatch.setattr(main, "Thread", FakeThread)
     monkeypatch.setattr(main, "Agent", FakeAgent)
     monkeypatch.setattr(main, "FaceController", FakeFaceController)
@@ -48,6 +52,8 @@ def test_main_starts_the_face_thread_and_wires_the_agent(monkeypatch):
 
     assert len(FakeThread.started) == 1
     assert FakeThread.started[0][1] is True
+    assert FakeThread.started[0][0] == FakeFaceController.created.run
+    assert FakeFaceController.created.face_state is FakeAgent.created_with["face_state"]
     assert FakeAgent.created_with["wake_word"] == "wake"
     assert FakeAgent.created_with["stt"] == "stt"
     assert FakeAgent.created_with["tts"] == "tts"
