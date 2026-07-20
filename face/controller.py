@@ -17,8 +17,9 @@ class FaceController:
         Output:
         - None. The controller stores the inputs for later use.
         """
-        # Keep the shared state and drawing tool together for run_once() and run().
+        # The controller reads this shared value to know which face to draw.
         self.face_state = face_state
+        # A supplied renderer helps tests; run_once() creates one when this is None.
         self.renderer = renderer
 
     def run_once(self) -> None:

@@ -32,12 +32,19 @@ class SpeechToTextTool:
         Output:
         - None. Stores settings for listen_and_transcribe().
         """
+        # The microphone records this many audio samples every second.
         self.sample_rate = sample_rate
+        # Recording stops after this maximum number of seconds.
         self.seconds = seconds
+        # After speech starts, this much quiet ends the recording.
         self.silence_seconds = silence_seconds
+        # Chunks louder than this average value count as speech.
         self.silence_threshold = silence_threshold
+        # whisper.cpp loads this local model to turn audio into words.
         self.model_path = model_path
+        # This command runs whisper.cpp on the temporary WAV file.
         self.whisper_binary = whisper_binary
+        # Keyboard mode avoids microphone hardware while students test the loop.
         self.mode = mode
 
     def listen_and_transcribe(self) -> str:

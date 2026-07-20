@@ -28,9 +28,13 @@ class WakeWordTool:
         Output:
         - None. Stores settings for wait().
         """
+        # openWakeWord loads this model name or model file to listen for.
         self.model_path = model_path
+        # A model score must reach this value before wake detection succeeds.
         self.threshold = threshold
+        # The microphone must provide audio at this rate for the wake model.
         self.sample_rate = sample_rate
+        # Keyboard mode is for lessons; microphone mode listens to live audio.
         self.mode = mode
 
     def wait(self) -> None:

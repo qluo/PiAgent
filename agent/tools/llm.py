@@ -33,11 +33,14 @@ class LlmTool:
         Output:
         - None. Stores model settings for later requests.
         """
+        # Ollama uses this name to choose which downloaded model should answer.
         self.model_name = model_name
+        # Remove a final slash so answer() can safely add /api/generate.
         self.base_url = (
             os.environ.get("PI_AGENT_OLLAMA_URL")
             or base_url
         ).rstrip("/")
+        # requests.post() uses this to stop waiting after too long.
         self.timeout = timeout
 
     def answer(self, user_text: str) -> str:

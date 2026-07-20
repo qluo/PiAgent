@@ -13,7 +13,9 @@ class FaceState:
         Output:
         - None. Starts with the "idle" state.
         """
+        # This is the latest face name; new agents begin with the idle picture.
         self._state = states.IDLE
+        # The agent and face thread share _state, so this prevents clashes.
         self._lock = Lock()
 
     def set(self, state: str) -> None:

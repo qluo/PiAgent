@@ -20,9 +20,13 @@ class TextToSpeechTool:
         Output:
         - None. Stores settings for speak().
         """
+        # Piper loads this voice file to choose how Pie Agent sounds.
         self.voice_model_path = voice_model_path
+        # This is the Piper program that converts text into raw audio.
         self.piper_binary = piper_binary
+        # This is the audio player that sends Piper's audio to the speaker.
         self.player_binary = player_binary
+        # aplay needs this value to play Piper's raw audio at the right speed.
         self.sample_rate = sample_rate
 
     def speak(self, text: str) -> None:

@@ -29,12 +29,19 @@ class Agent:
         Output:
         - None. The new Agent stores these objects for later use.
         """
+        # The agent writes its current activity here for the face controller.
         self.face_state = face_state
+        # This tool blocks until the student wakes the agent.
         self.wake_word = wake_word
+        # This tool turns the next spoken question into text.
         self.stt = stt
+        # This tool says the completed answer out loud.
         self.tts = tts
+        # This tool creates answers and decides whether a search is useful.
         self.llm = llm
+        # Extra named tools, such as the search tool used in respond().
         self.tools = tools
+        # Read the default instructions once instead of opening AGENTS.md every turn.
         self.agents_md = self.load_agents_md()
 
     def run(self) -> None:

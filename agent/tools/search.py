@@ -22,7 +22,9 @@ class SearchTool:
         Output:
         - None. Stores settings for search().
         """
+        # This limits how many web results DDGS is asked to fetch.
         self.max_results = max_results
+        # This tells DDGS which regional version of search to use.
         self.region = region
 
     def search(self, query: str) -> str:
