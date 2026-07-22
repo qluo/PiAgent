@@ -1276,7 +1276,7 @@ uv run pytest tests/lesson_7</code></pre>
         <li>Use <code>ddgs.text(...)</code> to fetch one or two results.</li>
         <li>Return a short string containing the title and snippet.</li>
         <li>Open the Python file <code>agent/tools/llm.py</code> in your IDE and add a small decision method such as <code>needs_search(user_text)</code>.</li>
-        <li>Ask the LLM if the question needs current web search results.</li>
+        <li>Ask the LLM whether the original user question needs current web search results; include examples of questions that do and do not need search.</li>
         <li>If the LLM says search is needed, call <code>SearchTool.search()</code>.</li>
         <li>Send the search context into <code>llm.answer_with_context(...)</code>.</li>
         <li>If the LLM says search is not needed, answer directly with <code>llm.answer(...)</code>.</li>
@@ -1339,7 +1339,7 @@ uv run pytest tests/lesson_8</code></pre>
         <li>Return an empty string when the file does not exist, so a project can still run without it.</li>
         <li>Store the result once in <code>self.agents_md</code> when <code>Agent</code> is created.</li>
         <li>Implement <code>build_prompt(user_text)</code>. When instructions exist, include both the instructions and the user's request in one clear prompt.</li>
-        <li>Update <code>respond()</code> to send that prompt to the LLM. Keep the original user text for a search query.</li>
+        <li>Update <code>respond()</code> to send that prompt to the LLM for its answer. Keep the original user text for the search decision and query.</li>
       </ol>
       <pre><code>Agent instructions:
 ... contents of AGENTS.md ...

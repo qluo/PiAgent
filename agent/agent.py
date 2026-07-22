@@ -119,7 +119,8 @@ class Agent:
         #
         # Lesson 9 update:
         # Start by calling self.build_prompt(user_text). Pass that prompt to
-        # the LLM, but pass the original user_text to the search tool.
+        # the LLM for its answer, but use the original user_text when deciding
+        # whether to search and when sending the search query.
         #
         # Expected return value:
         # A string that can be sent to self.tts.speak(...).
@@ -129,7 +130,7 @@ class Agent:
         if (
             "search" in self.tools
             and hasattr(self.llm, "needs_search")
-            and self.llm.needs_search(prompt)
+            and self.llm.needs_search(user_text)
         ):
             context = self.tools["search"].search(user_text)
             return self.llm.answer_with_context(prompt, context)

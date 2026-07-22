@@ -86,12 +86,23 @@ class LlmTool:
     def needs_search(self, user_text: str) -> bool:
         """Ask the local model whether a web search would help."""
         # Lesson 8 helper:
-        # 1. Build a short prompt that includes user_text.
-        # 2. Ask the LLM to answer with exactly SEARCH or NO_SEARCH.
-        # 3. Return True for SEARCH and False for NO_SEARCH.
+        # 1. Build a short prompt that includes the original user_text.
+        # 2. Show examples of questions that do and do not need search.
+        # 3. Ask the LLM to answer with exactly SEARCH or NO_SEARCH.
+        # 4. Return True for SEARCH and False for NO_SEARCH.
         prompt = (
-            "Based on your current knowledge, decide if this user question needs current web search results.\n"
-            "Answer with only SEARCH or NO_SEARCH.\n\n"
+            "Decide whether a web search is needed. Search only when the answer "
+            "needs current information.\n\n"
+            "Use SEARCH:\n"
+            "- What is the weather today?\n"
+            "- What happened in the news this week?\n"
+            "- Who won last night's game?\n\n"
+            "- What is a Raspberry Pi?\n\n"
+            "Use NO_SEARCH:\n"
+            "- How are you?\n"
+            "- Tell me a joke.\n"
+            "- What is 2 + 2?\n"
+            "Reply with only SEARCH or NO_SEARCH.\n\n"
             f"Question: {user_text}"
         )
         decision = self.answer(prompt).strip().upper()
