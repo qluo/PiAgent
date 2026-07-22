@@ -74,10 +74,9 @@ class LlmTool:
     def needs_search(self, user_text: str) -> bool:
         """Ask the local model whether a web search would help."""
         # Lesson 8 helper:
-        # 1. Build a short prompt that includes user_text.
-        # 2. Ask the LLM to answer with exactly SEARCH or NO_SEARCH.
-        # 3. Normalize the returned text by removing whitespace and using
-        #    uppercase letters before deciding.
+        # 1. Build a short prompt that includes the original user_text.
+        # 2. Show examples of questions that do and do not need search.
+        # 3. Ask the LLM to answer with exactly SEARCH or NO_SEARCH.
         # 4. Return True for SEARCH and False for NO_SEARCH.
         return False
 
