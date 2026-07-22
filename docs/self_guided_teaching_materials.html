@@ -1214,7 +1214,7 @@ uv run pytest tests/lesson_8</code></pre>
       <ol>
         <li>Open the root <code>AGENTS.md</code>, then find <code>load_agents_md()</code>, <code>build_prompt(user_text)</code>, and the Lesson 9 update to <code>respond()</code> in <code>agent/agent.py</code>.</li>
         <li>Implement <code>load_agents_md()</code> so it reads <code>PROJECT_ROOT / "AGENTS.md"</code> as UTF-8 text and returns an empty string when the file is missing.</li>
-        <li>Implement <code>build_prompt(user_text)</code> so empty instructions leave the request unchanged, while non-empty instructions and the user request appear in clearly labeled sections.</li>
+        <li>Implement <code>build_prompt(user_text)</code>. If <code>self.agents_md</code> is empty or only spaces, return <code>user_text</code> unchanged. Otherwise return exactly two sections: <code>Agent instructions:</code>, then the instructions, a blank line, then <code>User request:</code> and <code>user_text</code>.</li>
         <li>Update <code>respond()</code> to give the built prompt to the LLM while keeping the original text for a search query.</li>
         <li>Run the prompt tests, then explain why local instructions apply to every conversation:<pre><code>uv run pytest tests/lesson_9/test_01_agents_md.py
 uv run pytest tests/lesson_9/test_02_build_prompt.py
