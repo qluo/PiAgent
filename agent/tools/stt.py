@@ -96,6 +96,9 @@ class SpeechToTextTool:
         ]
         result = subprocess.run(command, check=True, capture_output=True, text=True)
 
+        # whisper.cpp may prefix each transcript line with a timestamp, such as
+        # "[0:0:0 0:12:3] Hello". The agent needs only the spoken text, so
+        # remove that prefix and join the remaining non-empty lines.
         lines = []
         for line in result.stdout.splitlines():
             line = line.strip()

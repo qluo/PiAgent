@@ -1069,12 +1069,12 @@ uv run pytest tests/lesson_4</code></pre>
       <ol>
         <li>Open the Python file <code>agent/tools/stt.py</code> in your IDE.</li>
         <li>Read <code>SpeechToTextTool.__init__()</code>. Notice <code>sample_rate</code>, <code>seconds</code>, <code>silence_seconds</code>, <code>model_path</code>, and <code>whisper_binary</code>.</li>
-        <li>Keep the method name <code>listen_and_transcribe()</code>.</li>
         <li>Read the provided <code>listen_until_silence()</code> helper. It uses <code>sounddevice</code> to listen in short chunks.</li>
         <li>Read the provided <code>loudness()</code> helper. <code>listen_until_silence()</code> uses it to start when speech begins and stop after quiet.</li>
         <li>Inside <code>listen_and_transcribe()</code>, call <code>self.listen_until_silence()</code> to capture the user's speech.</li>
         <li>Save the captured speech to a temporary WAV file for <code>whisper.cpp</code>.</li>
         <li>Send the temporary WAV file to <code>whisper.cpp</code>.</li>
+        <li>Clean the whisper.cpp output before returning it. Whisper may prefix each line with a timestamp such as <code>[0:0:0 0:12:3]</code>; remove that prefix, skip blank lines, and join the spoken text.</li>
         <li>Return the transcription as a string.</li>
         <li>Print the transcription while debugging so you can see what the agent heard.</li>
       </ol>
