@@ -917,7 +917,7 @@ uv run pytest tests/lesson_2</code></pre>
         <li>Read <code>FakeWakeWordTool.wait()</code> in <code>demos/lesson1_demo.py</code>.</li>
         <li>Open the Python file <code>agent/tools/wake_word.py</code> in your IDE.</li>
         <li>Read <code>WakeWordTool.__init__()</code>. Notice <code>model_path</code>, <code>threshold</code>, <code>sample_rate</code>, and <code>mode</code>.</li>
-        <li>Keep the same method name: <code>wait()</code>.</li>
+        <li>Implement <code>wait()</code> as the dispatcher: call the keyboard helper in keyboard mode, the microphone helper in microphone mode, and raise a clear error for any other mode.</li>
         <li>Use <code>mode="keyboard"</code> for tests and early classroom debugging.</li>
         <li>Use <code>mode="microphone"</code> for the real Raspberry Pi wake word.</li>
         <li>First implement <code>_wait_for_keyboard_wake()</code>: loop until the user types <code>wake</code>.</li>
@@ -996,12 +996,12 @@ uv run python -m demos.lesson3_wake_word_demo --threshold 0.3</code></pre>
         <li>Open the Python file <code>demos/lesson1_demo.py</code> in your IDE and find <code>Agent.run()</code>.</li>
         <li>Open the Python file <code>agent/agent.py</code> in your IDE and find the skeleton <code>Agent.run()</code>.</li>
         <li>Add <code>from face import states</code> at the top so the agent can use named face states.</li>
-        <li>Copy the high-level loop idea, not every fake detail.</li>
+        <li>Use the demo only for the order of work. Keep calling the real tools stored on <code>self</code> instead of copying the demo's fake tool classes.</li>
         <li>Call <code>self.wake_word.wait()</code> when idle.</li>
         <li>Set the face to <code>listening</code>, then call <code>self.stt.listen_and_transcribe()</code>.</li>
         <li>Set the face to <code>thinking</code>, then call <code>self.respond(user_text)</code>.</li>
         <li>Set the face to <code>speaking</code>, then call <code>self.tts.speak(response)</code>.</li>
-        <li>Set the face back to <code>idle</code>.</li>
+        <li>At the start of the next loop iteration, set the face back to <code>idle</code> before waiting again.</li>
         <li>Find <code>Agent.respond(user_text)</code>. For now, implement the TODO by returning <code>self.llm.answer(user_text)</code>.</li>
         <li>Later, Lesson 8 will update <code>respond()</code> so the LLM decides whether search is needed.</li>
       </ol>
@@ -1136,10 +1136,11 @@ uv run pytest tests/lesson_5</code></pre>
       <ol>
         <li>Open the Python file <code>agent/tools/tts.py</code> in your IDE.</li>
         <li>Read <code>TextToSpeechTool.__init__()</code>. Notice <code>voice_model_path</code>, <code>piper_binary</code>, and <code>player_binary</code>.</li>
-        <li>Keep the method name <code>speak(text)</code>.</li>
-        <li>Install or prepare a local TTS engine such as Piper.</li>
-        <li>Send text into Piper.</li>
-        <li>Stream Piper's raw audio into <code>aplay</code>.</li>
+        <li>Implement <code>speak(text)</code>; the agent will call it with the final response string.</li>
+        <li>Install Piper and download the voice model named by <code>voice_model_path</code>.</li>
+        <li>Start Piper with <code>--model</code>, <code>--output-raw</code>, and pipes for standard input and output.</li>
+        <li>Start <code>aplay</code> with raw 16-bit audio settings, using Piper's standard output as its input.</li>
+        <li>Write the UTF-8 text to Piper, close its input, then wait for Piper and <code>aplay</code> to finish.</li>
         <li>Call <code>tts.speak(response)</code> from the agent only after the face switches to <code>speaking</code>.</li>
       </ol>
       <pre><code>def __init__(self, voice_model_path, piper_binary="tools/piper/piper", player_binary="aplay"):
@@ -1205,7 +1206,7 @@ uv run pytest tests/lesson_6</code></pre>
         <li>Open the Python file <code>agent/tools/llm.py</code> in your IDE.</li>
         <li>Implement <code>answer(user_text)</code> so it sends the user text to Ollama.</li>
         <li>Return only the model's answer string.</li>
-        <li>Implement <code>answer_with_context(user_text, context)</code> later for tool results.</li>
+        <li>Leave <code>answer_with_context(user_text, context)</code> for Lesson 8, where search results become extra context.</li>
       </ol>
       <pre><code>class LlmTool:
     def __init__(
@@ -1271,14 +1272,14 @@ uv run pytest tests/lesson_7</code></pre>
       <ol>
         <li>Open the Python file <code>agent/tools/search.py</code> in your IDE.</li>
         <li>Read <code>SearchTool.__init__()</code>. Notice <code>max_results</code> and <code>region</code>.</li>
-        <li>Install <code>ddgs</code> when you are ready.</li>
+        <li>Install the search package: <code>uv pip install -r requirements.txt</code>.</li>
         <li>Import <code>DDGS</code>.</li>
-        <li>Use <code>ddgs.text(...)</code> to fetch one or two results.</li>
-        <li>Return a short string containing the title and snippet.</li>
+        <li>Use <code>ddgs.text(query, region=self.region, max_results=self.max_results)</code> to fetch results.</li>
+        <li>Return the first result as a short labeled string containing its title, summary, and URL.</li>
         <li>Open the Python file <code>agent/tools/llm.py</code> in your IDE and add a small decision method such as <code>needs_search(user_text)</code>.</li>
         <li>Ask the LLM whether the original user question needs current web search results; include examples of questions that do and do not need search.</li>
-        <li>If the LLM says search is needed, call <code>SearchTool.search()</code>.</li>
-        <li>Send the search context into <code>llm.answer_with_context(...)</code>.</li>
+        <li>If the LLM says search is needed, call <code>SearchTool.search(user_text)</code> with the original user question.</li>
+        <li>Send the returned search context into <code>llm.answer_with_context(user_text, context)</code>.</li>
         <li>If the LLM says search is not needed, answer directly with <code>llm.answer(...)</code>.</li>
       </ol>
       <pre><code>from ddgs import DDGS
@@ -1402,7 +1403,7 @@ uv run pytest tests/lesson_9</code></pre>
         <li>Confirm Ollama is running and <code>ollama run gemma3:1b</code> works.</li>
         <li>Run <code>uv run python main.py</code> to see each tool decision in the terminal.</li>
         <li>Test the full path: wake, speak question, transcribe, think, answer, return to idle.</li>
-        <li>If something breaks, test the tool from that lesson again by itself.</li>
+        <li>If something breaks, rerun that tool's lesson demo or test by itself to find which part failed.</li>
       </ol>
       <pre><code>uv run python main.py</code></pre>
       <h3>Checkpoint</h3>
