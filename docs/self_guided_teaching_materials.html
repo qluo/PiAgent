@@ -1010,8 +1010,8 @@ uv run pytest tests/lesson_4</code></pre>
         <li>Read the provided <code>listen_until_silence()</code> helper. It uses <code>sounddevice</code> to listen in short chunks.</li>
         <li>Read the provided <code>loudness()</code> helper. <code>listen_until_silence()</code> uses it to start when speech begins and stop after quiet.</li>
         <li>Inside <code>listen_and_transcribe()</code>, call <code>self.listen_until_silence()</code> to capture the user's speech.</li>
-        <li>Save the captured speech to a temporary WAV file for <code>whisper.cpp</code>.</li>
-        <li>Send the temporary WAV file to <code>whisper.cpp</code>.</li>
+        <li>Call the provided <code>self.save_temp_wav(audio)</code> helper to save the captured speech as a temporary WAV file.</li>
+        <li>Call the provided <code>self.run_whisper(wav_path)</code> helper to send that WAV file to <code>whisper.cpp</code> and receive its transcription.</li>
         <li>Clean the whisper.cpp output before returning it. Whisper may prefix each line with a timestamp such as <code>[0:0:0 0:12:3]</code>; remove that prefix, skip blank lines, and join the spoken text.</li>
         <li>Return the transcription as a string.</li>
         <li>Print the transcription while debugging so you can see what the agent heard.</li>
